@@ -1,4 +1,4 @@
-package com.sergeysav.hexasphere.client.window
+package com.sergeysav.hexasphere.client.input
 
 interface KeyModifiers {
     val shift: Boolean

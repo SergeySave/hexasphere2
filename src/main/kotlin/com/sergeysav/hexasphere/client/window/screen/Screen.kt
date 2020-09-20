@@ -1,8 +1,8 @@
 package com.sergeysav.hexasphere.client.window.screen
 
-import com.sergeysav.hexasphere.client.window.Key
-import com.sergeysav.hexasphere.client.window.KeyAction
-import com.sergeysav.hexasphere.client.window.KeyModifiers
+import com.sergeysav.hexasphere.client.input.Key
+import com.sergeysav.hexasphere.client.input.KeyAction
+import com.sergeysav.hexasphere.client.input.KeyModifiers
 
 interface Screen {
 

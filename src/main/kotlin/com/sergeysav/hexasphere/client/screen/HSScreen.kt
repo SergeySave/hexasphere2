@@ -2,18 +2,32 @@ package com.sergeysav.hexasphere.client.screen
 
 import com.sergeysav.hexasphere.client.bgfx.BGFXUtil
 import com.sergeysav.hexasphere.client.bgfx.Encoder
+import com.sergeysav.hexasphere.client.bgfx.PerspectiveCamera
 import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
 import com.sergeysav.hexasphere.client.bgfx.StaticIndexBuffer
 import com.sergeysav.hexasphere.client.bgfx.StaticVertexBuffer
 import com.sergeysav.hexasphere.client.bgfx.VertexAttribute
 import com.sergeysav.hexasphere.client.bgfx.VertexLayout
+import com.sergeysav.hexasphere.client.camera.Camera3d
+import com.sergeysav.hexasphere.client.input.InputManager
+import com.sergeysav.hexasphere.client.input.Key
+import com.sergeysav.hexasphere.client.input.KeyAction
+import com.sergeysav.hexasphere.client.input.KeyModifiers
 import com.sergeysav.hexasphere.client.window.screen.Screen
 import com.sergeysav.hexasphere.client.window.screen.ScreenAction
+import com.sergeysav.hexasphere.common.hexasphere.Hexasphere
+import com.sergeysav.hexasphere.common.hexasphere.HexasphereTile
+import com.sergeysav.hexasphere.common.icosahedron.Icosahedron
+import com.sergeysav.hexasphere.common.icosahedron.subdivide
 import org.joml.Matrix4f
+import org.joml.Vector3d
+import org.joml.Vector3f
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
+import kotlin.math.pow
+import kotlin.random.Random
 
 
 class HSScreen : Screen {
@@ -24,13 +38,13 @@ class HSScreen : Screen {
     private var vertexBuffer: StaticVertexBuffer? = null
     private var indices: ByteBuffer? = null
     private var indexBuffer: StaticIndexBuffer? = null
-    private val view = Matrix4f()
-    private val proj = Matrix4f()
     private val model = Matrix4f()
-    private var viewBuf: FloatBuffer? = null
-    private var projBuf: FloatBuffer? = null
     private var modelBuf: FloatBuffer? = null
     private var time: Double = 0.0
+    private val hex = Hexasphere.fromDualOf(Icosahedron.subdivide(10))
+    private var camera: Camera3d? = null
+    private val inputManager = InputManager()
+    private val vec3 = Vector3f()
 
     override fun create() {
         cubes = ShaderProgram.loadFromFiles("cube/vs_cubes", "cube/fs_cubes")
@@ -39,39 +53,33 @@ class HSScreen : Screen {
                 VertexAttribute(VertexAttribute.Attribute.POSITION, 3, VertexAttribute.Type.FLOAT),
                 VertexAttribute(VertexAttribute.Attribute.COLOR0, 4, VertexAttribute.Type.UINT8, true)
         )
-        vertices = MemoryUtil.memAlloc(8 * ((3 + 4) * 4)).apply {
-            putFloat(-1f).putFloat(+1f).putFloat(+1f).putInt(0xff000000.toInt())
-            putFloat(+1f).putFloat(+1f).putFloat(+1f).putInt(0xff0000ff.toInt())
-            putFloat(-1f).putFloat(-1f).putFloat(+1f).putInt(0xff00ff00.toInt())
-            putFloat(+1f).putFloat(-1f).putFloat(+1f).putInt(0xff00ffff.toInt())
-            putFloat(-1f).putFloat(+1f).putFloat(-1f).putInt(0xffff0000.toInt())
-            putFloat(+1f).putFloat(+1f).putFloat(-1f).putInt(0xffff00ff.toInt())
-            putFloat(-1f).putFloat(-1f).putFloat(-1f).putInt(0xffffff00.toInt())
-            putFloat(+1f).putFloat(-1f).putFloat(-1f).putInt(0xffffffff.toInt())
-            flip()
+        val vertices = MemoryUtil.memAlloc((12 * 5 + hex.hexagons * 6) * ((3 + 4) * 4))
+        val indices = MemoryUtil.memAlloc((12 * 3 + hex.hexagons * 4) * 3*2)
+        for (tile in hex.tiles) {
+            val color: Int = 0xff000000.toInt() or Random.nextInt()
+            val v1 = vertices.position() / (3 * 4 + 1 * 4)
+            for (vert in tile.vertices) {
+                vertices.putFloat(vert.x().toFloat())
+                        .putFloat(vert.y().toFloat())
+                        .putFloat(vert.z().toFloat())
+                        .putInt(color)
+            }
+            for (i in 2 until tile.vertices.size) {
+                indices.putShort(v1.toShort()).putShort((v1 + i - 1).toShort()).putShort((v1 + i).toShort())
+            }
         }
-        vertexBuffer = StaticVertexBuffer.new(vertices!!, vertexLayout!!)
+        this.vertices = vertices.flip()
+        this.indices = indices.flip()
+        vertexBuffer = StaticVertexBuffer.new(vertices, vertexLayout!!)
+        indexBuffer = StaticIndexBuffer.new(indices)
 
-        indices = MemoryUtil.memAlloc(6 * 2 * 3 * 2).apply {
-            putShort(0).putShort(1).putShort(2) // 0
-            putShort(1).putShort(3).putShort(2)
-            putShort(4).putShort(6).putShort(5) // 2
-            putShort(5).putShort(6).putShort(7)
-            putShort(0).putShort(2).putShort(4) // 4
-            putShort(4).putShort(2).putShort(6)
-            putShort(1).putShort(5).putShort(3) // 6
-            putShort(5).putShort(7).putShort(3)
-            putShort(0).putShort(4).putShort(1) // 8
-            putShort(4).putShort(5).putShort(1)
-            putShort(2).putShort(3).putShort(6) // 10
-            putShort(6).putShort(3).putShort(7)
-            flip()
-        }
-        indexBuffer = StaticIndexBuffer.new(indices!!)
-
-        viewBuf = MemoryUtil.memAllocFloat(16)
-        projBuf = MemoryUtil.memAllocFloat(16)
         modelBuf = MemoryUtil.memAllocFloat(16)
+
+        camera = PerspectiveCamera(zNear = 0.1f, zFar = 100f).apply {
+            setFovDeg(45f)
+            setPosition(vec3.set(2f, 0f, 0f))
+            lookAt(vec3.set(0f, 0f, 0f))
+        }
     }
 
     override fun resume() {
@@ -79,39 +87,41 @@ class HSScreen : Screen {
     }
 
     override fun render(delta: Double, width: Int, height: Int): ScreenAction {
-        time += delta / 1000
+        time += (delta / 1000) * 0.1
         val cubes = cubes!!
         val vertexBuffer = vertexBuffer!!
         val indexBuffer = indexBuffer!!
         val vertexLayout = vertexLayout!!
 
-        BGFX.bgfx_dbg_text_printf(0, 1, 0x4f, "bgfx/examples/01-cubes")
-        BGFX.bgfx_dbg_text_printf(0, 2, 0x6f, "Description: Rendering simple static mesh.")
-        BGFX.bgfx_dbg_text_printf(0, 3, 0x0f, String.format("Frame: %7.3f[ms]", delta))
+        camera?.run {
+            val speed = (60 * delta / 1000 * 0.1f * (position.length().toDouble() / 5).pow(1.5)).toFloat()
 
-        view.setLookAt(0.0f, 0.0f, -35.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f)
-        proj.setPerspective(Math.toRadians(60.0).toFloat(), width / height.toFloat(), 0.1f, 100f, BGFXUtil.zZeroToOne)
+            setAspect(width, height)
+            translateIn(forward, speed * (inputManager.getKeyDownInt(Key.SPACE) - inputManager.getKeyDownInt(Key.LEFT_SHIFT)))
+            rotateAround(vec3.zero(), right, -speed * (inputManager.getKeyDownInt(Key.W) - inputManager.getKeyDownInt(Key.S)))
+            rotateAround(vec3.zero(), up, speed * (inputManager.getKeyDownInt(Key.D) - inputManager.getKeyDownInt(Key.A)))
+            rotate(forward, (5 * delta / 1000).toFloat() * (inputManager.getKeyDownInt(Key.Q) - inputManager.getKeyDownInt(Key.E)))
 
-        BGFX.bgfx_set_view_transform(0, view.get(viewBuf), proj.get(projBuf))
+            val minLen = 1.1f
+            if (position.lengthSquared() < minLen * minLen) {
+                position.normalize(minLen)
+            }
+            if (position.lengthSquared() > 8 * 8) {
+                position.normalize(8f)
+            }
+
+            update()
+        }
 
         Encoder.with {
-            for (yy in 0..10) {
-                for (xx in 0..10) {
-                    setTransform(model.translation(
-                            -15.0f + xx * 3.0f,
-                            -15.0f + yy * 3.0f,
-                            0.0f)
-                            .rotateXYZ(
-                                    (time + xx * 0.21).toFloat(),
-                                    (time + yy * 0.37).toFloat(),
-                                    0.0f).get(modelBuf))
-                    setVertexBuffer(vertexBuffer, vertexLayout, 8)
-                    setIndexBuffer(indexBuffer, 36)
-                    setState(BGFX.BGFX_STATE_DEFAULT, 0)
-                    submit(cubes)
-                }
-            }
+            setTransform(model.identity().get(modelBuf))
+            setVertexBuffer(vertexBuffer, vertexLayout, 12 * 5 + hex.hexagons * 6)
+            setIndexBuffer(indexBuffer, (12 * 3 + hex.hexagons * 4) * 3)
+            setState(BGFX.BGFX_STATE_DEFAULT, 0)
+            submit(cubes)
         }
+
+        inputManager.update()
 
         return ScreenAction.noop()
     }
@@ -130,8 +140,12 @@ class HSScreen : Screen {
         MemoryUtil.memFree(indices)
         indexBuffer?.dispose()
         indexBuffer = null
-        MemoryUtil.memFree(viewBuf)
-        MemoryUtil.memFree(projBuf)
+        camera?.dispose()
+        camera = null
         MemoryUtil.memFree(modelBuf)
+    }
+
+    override fun onKey(keyAction: KeyAction, key: Key, keyModifiers: KeyModifiers) {
+        inputManager.handleOnKey(keyAction, key, keyModifiers)
     }
 }

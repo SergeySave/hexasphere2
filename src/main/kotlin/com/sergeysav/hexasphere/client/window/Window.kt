@@ -1,6 +1,9 @@
 package com.sergeysav.hexasphere.client.window
 
 import com.sergeysav.hexasphere.client.bgfx.BGFXUtil
+import com.sergeysav.hexasphere.client.input.Key
+import com.sergeysav.hexasphere.client.input.KeyAction
+import com.sergeysav.hexasphere.client.input.KeyModifiers
 import com.sergeysav.hexasphere.client.window.screen.Screen
 import com.sergeysav.hexasphere.client.window.screen.ScreenAction
 import mu.KotlinLogging
