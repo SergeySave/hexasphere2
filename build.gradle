@@ -1,0 +1,270 @@
+import groovy.io.FileType
+import org.gradle.internal.os.OperatingSystem
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id 'application'
+}
+group = 'com.sergeysav'
+version = '1.0-SNAPSHOT'
+
+switch (OperatingSystem.current()) {
+    case OperatingSystem.LINUX:
+        def osArch = System.getProperty("os.arch")
+        project.ext.lwjglNatives = osArch.startsWith("arm") || osArch.startsWith("aarch64")
+                ? "natives-linux-${osArch.contains("64") || osArch.startsWith("armv8") ? "arm64" : "arm32"}"
+                : "natives-linux"
+        break
+    case OperatingSystem.MAC_OS:
+        project.ext.lwjglNatives = "natives-macos"
+        break
+    case OperatingSystem.WINDOWS:
+        project.ext.lwjglNatives = System.getProperty("os.arch").contains("64") ? "natives-windows" : "natives-windows-x86"
+        break
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-bgfx"
+    implementation "org.lwjgl:lwjgl-glfw"
+    implementation "org.lwjgl:lwjgl-stb"
+    implementation "org.joml:joml:$jomlVersion"
+    implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
+
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-bgfx::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = '14'
+    kotlinOptions {
+        freeCompilerArgs = ["-Xinline-classes"]
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_14
+    targetCompatibility = JavaVersion.VERSION_14
+}
+
+application {
+    mainClassName = "com.sergeysav.hexasphere.MainKt"
+    applicationDefaultJvmArgs = ["-XX:+IgnoreUnrecognizedVMOptions", "-XstartOnFirstThread"]
+}
+
+apply plugin: BGFXShaderCPlugin
+
+bgfxShaderC {
+    nacl = false
+    android = false
+    pssl = false
+}
+
+
+
+
+// Shader C Plugin Stuffs
+
+class BGFXShaderCPluginExtension {
+    String toolsDir = "tools"
+    String includeDir = null
+    String inputDir = "src/main/shaders"
+    String outputDir = "src/main/resources/shaders"
+    boolean dx9 = true
+    boolean dx11 = true
+    boolean nacl = true
+    boolean android = true
+    boolean glsl = true
+    boolean metal = true
+    boolean pssl = true
+    boolean spirv = true
+}
+
+class BGFXShaderCPlugin implements Plugin<Project> {
+    @Override
+    void apply(Project project) {
+
+        def extension = project.extensions.create('bgfxShaderC', BGFXShaderCPluginExtension)
+
+        String toolsExt = ""
+        String toolsDir = ""
+        boolean chmod = true
+        String bitness = "x64"
+        switch ( OperatingSystem.current() ) {
+            case OperatingSystem.WINDOWS:
+                toolsDir = "windows"
+                toolsExt = ".exe"
+                chmod = false
+                String arch = System.getenv("PROCESSOR_ARCHITECTURE")
+                String wow64Arch = System.getenv("PROCESSOR_ARCHITEW6432")
+                String realArch = arch.endsWith("64")|| wow64Arch != null && wow64Arch.endsWith("64") ? "64" : "32"
+                if (realArch == "32") {
+                    bitness = "x86"
+                }
+                break
+            case OperatingSystem.LINUX:
+                toolsDir = "linux"
+                break
+            case OperatingSystem.MAC_OS:
+                toolsDir = "macos"
+                break
+        }
+
+        File toolsFolder = project.file(extension.toolsDir)
+        if (!toolsFolder.exists()) {
+            toolsFolder.mkdir()
+        }
+        File toolsOSFolder = project.file("$extension.toolsDir/$toolsDir")
+        if (!toolsOSFolder.exists()) {
+            toolsOSFolder.mkdir()
+        }
+        File shadercExecutable = project.file("$extension.toolsDir/$toolsDir/shaderc$toolsExt")
+        if (!shadercExecutable.exists()) {
+            new URL("https://build.lwjgl.org/release/$project.ext.lwjglVersion/$toolsDir/$bitness/bgfx-tools/shaderc$toolsExt").withInputStream{ i -> shadercExecutable.withOutputStream{ it << i }}
+            if (chmod) {
+                project.exec {
+                    commandLine 'chmod', 'a+x', "$extension.toolsDir/$toolsDir/shaderc$toolsExt"
+                }
+            }
+        }
+
+        project.task('cleanShaders', type: Delete) {
+            doFirst {
+                delete extension.outputDir
+            }
+        }
+
+        project.task('cleanTools', type: Delete) {
+            doFirst {
+                delete "$extension.toolsDir/$toolsDir"
+            }
+        }
+
+        project.task('compileShaders') {
+            doLast {
+                if (extension.includeDir == null) {
+                    extension.includeDir = extension.toolsDir + "/include"
+                }
+                if (OperatingSystem.current() != OperatingSystem.WINDOWS && (extension.dx9 || extension.dx11)) {
+                    println("DirectX Output is only supported on Windows - Disabling DirectX Outputs.")
+                    extension.dx9 = false
+                    extension.dx11 = false
+                }
+
+                File mainDir = project.file(extension.inputDir)
+                mainDir.traverse(type: FileType.FILES) { file ->
+                    if (file.name.endsWith(".sc") && file.name != "varying.def.sc") {
+                        //Make it a relative path without the .sc extension
+                        compileShaderToAllOutputs(file.absolutePath.substring(mainDir.absolutePath.length(), file.absolutePath.length() - 3), toolsDir, toolsExt, project, extension)
+                    }
+                }
+            }
+        }
+
+        project.tasks.getByName('processResources').dependsOn(project.tasks.getByName('compileShaders'))
+        project.tasks.getByName('clean').dependsOn(project.tasks.getByName('cleanShaders'))
+        project.tasks.getByName('clean').dependsOn(project.tasks.getByName('cleanTools'))
+        project.tasks.getByName('compileShaders').dependsOn(project.tasks.getByName('cleanShaders'))
+    }
+
+    private static def compileShaderToAllOutputs(String shader, String toolsDir, String toolsExt, Project project, BGFXShaderCPluginExtension extension) {
+        if (extension.dx9) {
+            compileShader(shader, //dx9
+                    '--platform windows -p vs_3_0 -O 3',
+                    '--platform windows -p ps_3_0 -O 3',
+                    null,
+                    'dx9', toolsDir, toolsExt, project, extension)
+        }
+        if (extension.dx11) {
+            compileShader(shader, //dx11
+                    '--platform windows -p vs_4_0 -O 3',
+                    '--platform windows -p ps_4_0 -O 3',
+                    '--platform windows -p cs_5_0 -O 1',
+                    'dx11', toolsDir, toolsExt, project, extension)
+        }
+        if (extension.nacl) {
+            compileShader(shader, //ESSL/Nacl Shaders
+                    '--platform nacl',
+                    '--platform nacl',
+                    'null',
+                    'essl', toolsDir, toolsExt, project, extension)
+        }
+        if (extension.android) {
+            compileShader(shader, //ESSL/Android Shaders
+                    '--platform android',
+                    '--platform android',
+                    '--platform android',
+                    'essl', toolsDir, toolsExt, project, extension)
+        }
+        if (extension.glsl) {
+            compileShader(shader, //GLSL Shaders
+                    '--platform linux -p 120',
+                    '--platform linux -p 120',
+                    '--platform linux -p 430',
+                    'glsl', toolsDir, toolsExt, project, extension)
+        }
+        if (extension.metal) {
+            compileShader(shader, //Metal Shaders
+                    '--platform osx -p metal',
+                    '--platform osx -p metal',
+                    '--platform osx -p metal',
+                    'metal', toolsDir, toolsExt, project, extension)
+        }
+        if (extension.pssl) {
+            compileShader(shader, //PSSL Shaders
+                    '--platform orbis -p pssl',
+                    '--platform orbis -p pssl',
+                    '--platform orbis -p pssl',
+                    'pssl', toolsDir, toolsExt, project, extension)
+        }
+        if (extension.spirv) {
+            compileShader(shader, //SPIRV (Vulkan) Shaders
+                    '--platform linux -p spirv',
+                    '--platform linux -p spirv',
+                    '--platform linux -p spirv',
+                    'spirv', toolsDir, toolsExt, project, extension)
+        }
+    }
+
+    private static def compileShader(String shader, String vsflags, String fsflags, String csflags, String directory, String toolsDir, String toolsExt, Project project, BGFXShaderCPluginExtension extension) {
+        String[] shaderParts = shader.split("/")
+        String baseShaderName = shaderParts[shaderParts.length - 1]
+        project.file("$extension.outputDir/$directory/${shaderParts.init().join("/")}").mkdirs()
+        project.exec {
+            List<String> command = new ArrayList<String>()
+            command.add("${extension.toolsDir}/$toolsDir/shaderc$toolsExt")
+            command.add('-f')
+            command.add("${extension.inputDir}/${shader}.sc")
+            command.add('-o')
+            command.add("${extension.outputDir}/$directory/${shader}.bin")
+            command.add('-i')
+            command.add(extension.includeDir)
+            if (baseShaderName.startsWith("vs_")) {
+                command.addAll(vsflags.split(" "))
+                command.add('--type')
+                command.add('vertex')
+            } else if (baseShaderName.startsWith("fs_")) {
+                command.addAll(fsflags.split(" "))
+                command.add('--type')
+                command.add('fragment')
+            } else if (baseShaderName.startsWith("cs_")) {
+                if (csflags == null) {
+                    return //If no Compute flags then compute shader is not supported for this backend
+                }
+                command.addAll(csflags.split(" "))
+                command.add('--type')
+                command.add('compute')
+            }
+            commandLine(command)
+        }
+    }
+}

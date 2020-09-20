@@ -1,0 +1,7 @@
+
+#ifndef HEXASPHERE_COMMON_SHADER_H
+#define HEXASPHERE_COMMON_SHADER_H
+
+#include <bgfx_shader.shaderh>
+
+#endif // HEXASPHERE_COMMON_SHADER_H
