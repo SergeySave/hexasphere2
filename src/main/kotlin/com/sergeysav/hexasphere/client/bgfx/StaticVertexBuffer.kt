@@ -11,7 +11,8 @@ inline class StaticVertexBuffer(val handle: Short) {
 
     companion object {
         fun new(vertices: ByteBuffer, layout: VertexLayout) : StaticVertexBuffer {
-            val bgfxMemory = BGFX.bgfx_make_ref(vertices) ?: throw BGFXException("Could not create BGFX memory reference for static vertex buffer")
+            val bgfxMemory = BGFX.bgfx_make_ref(vertices) ?:
+                throw BGFXException("Could not create BGFX memory reference for static vertex buffer")
             return StaticVertexBuffer(BGFX.bgfx_create_vertex_buffer(bgfxMemory, layout.layout, BGFX.BGFX_BUFFER_NONE))
         }
     }

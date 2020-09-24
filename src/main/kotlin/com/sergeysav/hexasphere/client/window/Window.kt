@@ -11,12 +11,17 @@ import org.lwjgl.bgfx.BGFX
 import org.lwjgl.bgfx.BGFXInit
 import org.lwjgl.bgfx.BGFXPlatform
 import org.lwjgl.bgfx.BGFXPlatformData
-import org.lwjgl.glfw.*
+import org.lwjgl.glfw.Callbacks
+import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFW.glfwGetTimerFrequency
 import org.lwjgl.glfw.GLFW.glfwGetTimerValue
+import org.lwjgl.glfw.GLFWNativeCocoa
+import org.lwjgl.glfw.GLFWNativeWin32
+import org.lwjgl.glfw.GLFWNativeX11
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.system.Platform
+
 
 class Window(
     private var width: Int,
@@ -111,6 +116,8 @@ class Window(
 
             logger.trace { "Applying renderer settings" }
             BGFXUtil.zZeroToOne = !bgfxCaps.homogeneousDepth()
+            BGFXUtil.texelHalf = if (this.renderer == BGFX.BGFX_RENDERER_TYPE_DIRECT3D9) 0.5f else 0f
+            BGFXUtil.reset = reset
 
             logger.trace { "Settings debug mode" }
             BGFX.bgfx_set_debug(windowOptions.debug ?: WindowOptions.DEFAULT_DEBUG)
@@ -119,7 +126,7 @@ class Window(
             BGFX.bgfx_set_view_clear(
                 0,
                 BGFX.BGFX_CLEAR_COLOR or BGFX.BGFX_CLEAR_DEPTH or BGFX.BGFX_CLEAR_STENCIL,
-                0x000000ff, 1.0f, 0
+                0x00000000, 1.0f, 0
             )
 
             logger.trace { "Adding Screen" }
@@ -151,7 +158,8 @@ class Window(
                 }
                 lastRenderedScreen = toRenderScreen
                 when (val action = toRenderScreen.render(frameTime * toMs, width, height)) {
-                    ScreenAction.NoOp -> { }
+                    ScreenAction.NoOp -> {
+                    }
                     ScreenAction.Pop -> popScreen()
                     is ScreenAction.Push -> pushScreen(action.newScreen)
                     is ScreenAction.Replace -> {
@@ -202,7 +210,13 @@ class Window(
         BGFX.bgfx_reset(width, height, reset, format)
     }
 
-    private fun onKey(@Suppress("UNUSED_PARAMETER") window: Long, key: Int, @Suppress("UNUSED_PARAMETER") code: Int, action: Int, modifiers: Int) {
+    private fun onKey(
+        @Suppress("UNUSED_PARAMETER") window: Long,
+        key: Int,
+        @Suppress("UNUSED_PARAMETER") code: Int,
+        action: Int,
+        modifiers: Int
+    ) {
         this.modifiers.shift = modifiers and GLFW.GLFW_MOD_SHIFT != 0
         this.modifiers.control = modifiers and GLFW.GLFW_MOD_CONTROL != 0
         this.modifiers.alt = modifiers and GLFW.GLFW_MOD_ALT != 0
@@ -210,12 +224,14 @@ class Window(
         this.modifiers.capsLock = modifiers and GLFW.GLFW_MOD_CAPS_LOCK != 0
         this.modifiers.numLock = modifiers and GLFW.GLFW_MOD_NUM_LOCK != 0
 
-        peekScreen().onKey(when (action) {
-            GLFW.GLFW_PRESS -> KeyAction.PRESS
-            GLFW.GLFW_RELEASE -> KeyAction.RELEASE
-            GLFW.GLFW_REPEAT -> KeyAction.REPEAT
-            else -> throw WindowException("Unknown Key Action")
-        }, Key.fromGLFWCode(key), this.modifiers)
+        peekScreen().onKey(
+            when (action) {
+                GLFW.GLFW_PRESS -> KeyAction.PRESS
+                GLFW.GLFW_RELEASE -> KeyAction.RELEASE
+                GLFW.GLFW_REPEAT -> KeyAction.REPEAT
+                else -> throw WindowException("Unknown Key Action")
+            }, Key.fromGLFWCode(key), this.modifiers
+        )
     }
 
     private fun pushScreen(screen: Screen) {

@@ -3,10 +3,9 @@ package com.sergeysav.hexasphere.client.bgfx
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.bgfx.BGFXVertexLayout
 
-class VertexLayout(val handle: Short, val layout: BGFXVertexLayout) {
+inline class VertexLayout(val layout: BGFXVertexLayout) {
 
     fun dispose() {
-        BGFX.bgfx_destroy_vertex_layout(handle)
         layout.free()
     }
 
@@ -23,7 +22,7 @@ class VertexLayout(val handle: Short, val layout: BGFXVertexLayout) {
 
                 BGFX.bgfx_vertex_layout_end(layout)
 
-                return VertexLayout(BGFX.bgfx_create_vertex_layout(layout), layout)
+                return VertexLayout(layout)
             } catch (ex : Throwable) {
                 throw ex
             }

@@ -32,6 +32,6 @@ interface Camera3d {
     fun projectToWorld(input: Vector2fc, output: Vector3f): Vector3f
 
     // Camera Lifecycle
-    fun update(viewId: Int = 0)
+    fun update(viewId: Int = 0, ignoreCameraPosition: Boolean = false)
     fun dispose()
 }

@@ -3,6 +3,7 @@ package com.sergeysav.hexasphere.client.bgfx
 import com.sergeysav.hexasphere.client.camera.Camera3d
 import org.joml.Matrix3f
 import org.joml.Matrix4f
+import org.joml.Matrix4fc
 import org.joml.Vector2fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
@@ -22,6 +23,10 @@ class PerspectiveCamera(
     override val forward = Vector3f(1f, 0f, 0f)
     override val up = Vector3f(0f, 1f, 0f)
     override val right = Vector3f(0f, 0f, 1f)
+    val viewMatrix: Matrix4fc
+        get() = view
+    val projectionMatrix: Matrix4fc
+        get() = proj
 
     private val vec3 = Vector3f()
     private val vec4 = Vector4f()
@@ -79,10 +84,15 @@ class PerspectiveCamera(
     }
 
     // Camera Lifecycle
-    override fun update(viewId: Int) {
+    override fun update(viewId: Int, ignoreCameraPosition: Boolean) {
         proj.setPerspective(fovy, aspect, zNear, zFar, BGFXUtil.zZeroToOne)
-        view.setLookAt(position, position.add(forward, vec3), up)
-        BGFX.bgfx_set_view_transform(viewId, view.get(viewBuf), proj.get(projBuf))
+        if (ignoreCameraPosition) {
+            view.setLookAt(vec3.zero(), forward, up)
+            BGFX.bgfx_set_view_transform(viewId, view.get(viewBuf), proj.get(projBuf))
+        } else {
+            view.setLookAt(position, position.add(forward, vec3), up)
+            BGFX.bgfx_set_view_transform(viewId, view.get(viewBuf), proj.get(projBuf))
+        }
     }
 
     override fun dispose() {

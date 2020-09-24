@@ -1,10 +1,6 @@
 package com.sergeysav.hexasphere.common.hexasphere
 
-import com.sergeysav.hexasphere.common.icosahedron.Icosahedron
-import com.sergeysav.hexasphere.common.icosahedron.SubdividedIcosahedron
-import com.sergeysav.hexasphere.common.icosahedron.Triangle
-import com.sergeysav.hexasphere.common.icosahedron.subdivide
-import com.sergeysav.hexasphere.common.icosahedron.vertices
+import com.sergeysav.hexasphere.common.icosahedron.*
 import org.joml.Vector3d
 import kotlin.math.atan2
 
@@ -29,7 +25,6 @@ class Hexasphere private constructor(
             var hexagons = 0
             val tileMap = mutableMapOf<Int, HexasphereTile>()
             val tiles = mutableListOf<HexasphereTile>()
-            val adj = mutableListOf<IntArray>()
             val up = Vector3d()
             val right = Vector3d()
             val delta = Vector3d()
@@ -39,7 +34,7 @@ class Hexasphere private constructor(
                     center.add(ico.vertices[it.v1])
                     center.add(ico.vertices[it.v2])
                     center.add(ico.vertices[it.v3])
-                    center.div(3.0)
+                    center.normalize()
                 }
                 val center = ico.vertices[vert]
                 center.cross(vertices[0], up).normalize() // up now points up when looking at the tile from outside
@@ -56,6 +51,13 @@ class Hexasphere private constructor(
                 }
                 tiles.add(tile)
                 tileMap[vert] = tile
+            }
+            val adj = MutableList(ico.vertices.size) { IntArray(0) }
+            for ((vert, faces) in faceMap) {
+                adj[vert] = faces.asSequence()
+                        .flatMap { sequenceOf(it.v1, it.v2, it.v3) }
+                        .filter { it != vert }
+                        .distinct().toList().toIntArray()
             }
             return Hexasphere(tiles, adj, hexagons)
         }

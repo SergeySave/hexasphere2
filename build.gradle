@@ -38,13 +38,25 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
+    implementation "net.onedaybeard.artemis:artemis-odb:$artemisVersion"
+
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-bgfx::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 }
 
 compileKotlin {
+    kotlinOptions.jvmTarget = '14'
+    kotlinOptions {
+        freeCompilerArgs = ["-Xinline-classes"]
+    }
+}
+
+compileTestKotlin {
     kotlinOptions.jvmTarget = '14'
     kotlinOptions {
         freeCompilerArgs = ["-Xinline-classes"]
@@ -248,15 +260,15 @@ class BGFXShaderCPlugin implements Plugin<Project> {
             command.add("${extension.outputDir}/$directory/${shader}.bin")
             command.add('-i')
             command.add(extension.includeDir)
-            if (baseShaderName.startsWith("vs_")) {
+            if (baseShaderName.startsWith("vs")) {
                 command.addAll(vsflags.split(" "))
                 command.add('--type')
                 command.add('vertex')
-            } else if (baseShaderName.startsWith("fs_")) {
+            } else if (baseShaderName.startsWith("fs")) {
                 command.addAll(fsflags.split(" "))
                 command.add('--type')
                 command.add('fragment')
-            } else if (baseShaderName.startsWith("cs_")) {
+            } else if (baseShaderName.startsWith("cs")) {
                 if (csflags == null) {
                     return //If no Compute flags then compute shader is not supported for this backend
                 }

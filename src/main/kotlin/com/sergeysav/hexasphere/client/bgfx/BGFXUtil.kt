@@ -14,6 +14,8 @@ object BGFXUtil {
     val releaseMemoryCb = BGFXReleaseFunctionCallback.create { pointer: Long, _: Long ->
         nmemFree(pointer)
     }
+    var texelHalf: Float = 0f
+    var reset: Int = 0
 
     fun dispose() {
         releaseMemoryCb.free()
