@@ -12,6 +12,8 @@ inline class Framebuffer(val handle: Short = BGFX.BGFX_INVALID_HANDLE) {
     }
 
     companion object {
+        val DEFAULT = Framebuffer()
+
         fun createScreenFramebuffer(width: Int, height: Int): Framebuffer {
             val msaa = (BGFXUtil.reset and BGFX.BGFX_RESET_MSAA_MASK) ushr BGFX.BGFX_RESET_MSAA_SHIFT
             val reset = ((msaa + 1).toLong() shl BGFX.BGFX_TEXTURE_RT_MSAA_SHIFT) or BGFX.BGFX_SAMPLER_U_CLAMP.toLong() or BGFX.BGFX_SAMPLER_V_CLAMP.toLong()

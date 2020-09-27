@@ -78,20 +78,20 @@ class PerspectiveCamera(
 
     override fun projectToWorld(input: Vector2fc, output: Vector3f): Vector3f {
 
-        vec4.set(input.x(), -input.y(), 0f, 1f)
+        vec4.set(input.x(), -input.y(), 1f, 1f)
                 .mul(proj.mul(view, mat4).invert())
         return output.set(vec4.x / vec4.w, vec4.y / vec4.w, vec4.z / vec4.w).sub(position).normalize()
     }
 
     // Camera Lifecycle
-    override fun update(viewId: Int, ignoreCameraPosition: Boolean) {
+    override fun update(viewId: View, ignoreCameraPosition: Boolean) {
         proj.setPerspective(fovy, aspect, zNear, zFar, BGFXUtil.zZeroToOne)
         if (ignoreCameraPosition) {
             view.setLookAt(vec3.zero(), forward, up)
-            BGFX.bgfx_set_view_transform(viewId, view.get(viewBuf), proj.get(projBuf))
+            BGFX.bgfx_set_view_transform(viewId.id, view.get(viewBuf), proj.get(projBuf))
         } else {
             view.setLookAt(position, position.add(forward, vec3), up)
-            BGFX.bgfx_set_view_transform(viewId, view.get(viewBuf), proj.get(projBuf))
+            BGFX.bgfx_set_view_transform(viewId.id, view.get(viewBuf), proj.get(projBuf))
         }
     }
 

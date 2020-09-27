@@ -1,6 +1,16 @@
 package com.sergeysav.hexasphere.common.hexasphere
 
-import com.sergeysav.hexasphere.common.icosahedron.*
+import com.artemis.ArchetypeBuilder
+import com.artemis.World
+import com.artemis.managers.GroupManager
+import com.sergeysav.hexasphere.common.game.Groups
+import com.sergeysav.hexasphere.common.game.tile.TileComponent
+import com.sergeysav.hexasphere.common.game.tile.type.OceanTileTypeComponent
+import com.sergeysav.hexasphere.common.icosahedron.Icosahedron
+import com.sergeysav.hexasphere.common.icosahedron.SubdividedIcosahedron
+import com.sergeysav.hexasphere.common.icosahedron.Triangle
+import com.sergeysav.hexasphere.common.icosahedron.subdivide
+import com.sergeysav.hexasphere.common.icosahedron.vertices
 import org.joml.Vector3d
 import kotlin.math.atan2
 
@@ -65,3 +75,34 @@ class Hexasphere private constructor(
 }
 
 fun Hexasphere.Companion.withSubdivisionLevel(level: Int) = fromDualOf(Icosahedron.subdivide(level, true))
+
+fun Hexasphere.addToWorld(world: World, tileEntityMap: Map<HexasphereTile, Int>? = null) {
+    val map = tileEntityMap ?: run {
+        val archetype = ArchetypeBuilder()
+            .add(TileComponent::class.java)
+            .build(world)
+        val tempMap = mutableMapOf<HexasphereTile, Int>()
+
+        for (tile in tiles) {
+            val tileEntity = world.create(archetype)
+            tempMap[tile] = tileEntity
+        }
+
+        tempMap
+    }
+
+    val tileMapper = world.getMapper(TileComponent::class.java)
+    val groupSystem = world.getSystem(GroupManager::class.java)
+    val oceanMapper = world.getMapper(OceanTileTypeComponent::class.java)
+
+    for (tileIdx in tiles.indices) {
+        groupSystem.add(tileIdx, Groups.DIRTY_TILE)
+        tileMapper[map[tiles[tileIdx]] ?: error("This should be impossible")].apply {
+            this.centroid.set(tiles[tileIdx].centroid)
+            for (adj in adjacencies[tileIdx]) {
+                this.adjacent.add(map[tiles[tileIdx]] ?: error("This should be impossible"))
+            }
+        }
+        oceanMapper.create(tileIdx)
+    }
+}

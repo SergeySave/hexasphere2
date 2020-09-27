@@ -1,9 +1,10 @@
 package com.sergeysav.hexasphere.client.window
 
 import com.sergeysav.hexasphere.client.bgfx.BGFXUtil
+import com.sergeysav.hexasphere.client.input.Action
 import com.sergeysav.hexasphere.client.input.Key
-import com.sergeysav.hexasphere.client.input.KeyAction
 import com.sergeysav.hexasphere.client.input.KeyModifiers
+import com.sergeysav.hexasphere.client.input.MouseButton
 import com.sergeysav.hexasphere.client.window.screen.Screen
 import com.sergeysav.hexasphere.client.window.screen.ScreenAction
 import mu.KotlinLogging
@@ -60,6 +61,8 @@ class Window(
             logger.trace { "Setting GLFW Callbacks" }
             GLFW.glfwSetFramebufferSizeCallback(window, this::onResize)
             GLFW.glfwSetKeyCallback(window, this::onKey)
+            GLFW.glfwSetMouseButtonCallback(window, this::onMouseButton)
+            GLFW.glfwSetCursorPosCallback(window, this::onMouseMove)
 
             logger.trace { "Setting BGFX Platform Data" }
             val bgfxPlatformData = BGFXPlatformData.callocStack(stack)
@@ -154,6 +157,12 @@ class Window(
                 val toRenderScreen = peekScreen()
                 if (toRenderScreen != lastRenderedScreen) {
                     lastRenderedScreen?.pause()
+                    MemoryStack.stackPush().use {
+                        val x = it.callocDouble(1)
+                        val y = it.callocDouble(1)
+                        GLFW.glfwGetCursorPos(window, x, y)
+                        toRenderScreen.onMouseMove(x[0], y[0], true)
+                    }
                     toRenderScreen.resume()
                 }
                 lastRenderedScreen = toRenderScreen
@@ -210,6 +219,15 @@ class Window(
         BGFX.bgfx_reset(width, height, reset, format)
     }
 
+    private fun setModifiers(modifiers: Int) {
+        this.modifiers.shift = modifiers and GLFW.GLFW_MOD_SHIFT != 0
+        this.modifiers.control = modifiers and GLFW.GLFW_MOD_CONTROL != 0
+        this.modifiers.alt = modifiers and GLFW.GLFW_MOD_ALT != 0
+        this.modifiers.`super` = modifiers and GLFW.GLFW_MOD_SUPER != 0
+        this.modifiers.capsLock = modifiers and GLFW.GLFW_MOD_CAPS_LOCK != 0
+        this.modifiers.numLock = modifiers and GLFW.GLFW_MOD_NUM_LOCK != 0
+    }
+
     private fun onKey(
         @Suppress("UNUSED_PARAMETER") window: Long,
         key: Int,
@@ -217,21 +235,40 @@ class Window(
         action: Int,
         modifiers: Int
     ) {
-        this.modifiers.shift = modifiers and GLFW.GLFW_MOD_SHIFT != 0
-        this.modifiers.control = modifiers and GLFW.GLFW_MOD_CONTROL != 0
-        this.modifiers.alt = modifiers and GLFW.GLFW_MOD_ALT != 0
-        this.modifiers.`super` = modifiers and GLFW.GLFW_MOD_SUPER != 0
-        this.modifiers.capsLock = modifiers and GLFW.GLFW_MOD_CAPS_LOCK != 0
-        this.modifiers.numLock = modifiers and GLFW.GLFW_MOD_NUM_LOCK != 0
-
+        setModifiers(modifiers)
         peekScreen().onKey(
             when (action) {
-                GLFW.GLFW_PRESS -> KeyAction.PRESS
-                GLFW.GLFW_RELEASE -> KeyAction.RELEASE
-                GLFW.GLFW_REPEAT -> KeyAction.REPEAT
+                GLFW.GLFW_PRESS -> Action.PRESS
+                GLFW.GLFW_RELEASE -> Action.RELEASE
+                GLFW.GLFW_REPEAT -> Action.REPEAT
                 else -> throw WindowException("Unknown Key Action")
             }, Key.fromGLFWCode(key), this.modifiers
         )
+    }
+
+    private fun onMouseButton(
+        @Suppress("UNUSED_PARAMETER") window: Long,
+        button: Int,
+        action: Int,
+        modifiers: Int
+    ) {
+        setModifiers(modifiers)
+        peekScreen().onMouseButton(
+            when (action) {
+                GLFW.GLFW_PRESS -> Action.PRESS
+                GLFW.GLFW_RELEASE -> Action.RELEASE
+                GLFW.GLFW_REPEAT -> Action.REPEAT
+                else -> throw WindowException("Unknown Mouse Action")
+            }, MouseButton.fromGLFWCode(button), this.modifiers
+        )
+    }
+
+    private fun onMouseMove(
+        @Suppress("UNUSED_PARAMETER") window: Long,
+        x: Double,
+        y: Double
+    ) {
+        peekScreen().onMouseMove(x, y, false)
     }
 
     private fun pushScreen(screen: Screen) {

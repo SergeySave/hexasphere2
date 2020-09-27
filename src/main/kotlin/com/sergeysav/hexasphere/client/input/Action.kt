@@ -1,6 +1,6 @@
 package com.sergeysav.hexasphere.client.input
 
-enum class KeyAction {
+enum class Action {
     RELEASE,
     PRESS,
     REPEAT

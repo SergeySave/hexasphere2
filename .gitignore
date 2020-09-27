@@ -11,3 +11,9 @@ tools/macos/
 
 # Shader Outputs
 src/main/resources/shaders/
+
+# Core Dumps
+core.*.dmp
+javacore.*.txt
+jitdump.*.dmp
+Snap.*.trc

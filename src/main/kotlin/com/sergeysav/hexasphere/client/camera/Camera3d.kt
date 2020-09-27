@@ -1,5 +1,6 @@
 package com.sergeysav.hexasphere.client.camera
 
+import com.sergeysav.hexasphere.client.bgfx.View
 import org.joml.Vector2fc
 import org.joml.Vector3f
 import org.joml.Vector3fc
@@ -32,6 +33,6 @@ interface Camera3d {
     fun projectToWorld(input: Vector2fc, output: Vector3f): Vector3f
 
     // Camera Lifecycle
-    fun update(viewId: Int = 0, ignoreCameraPosition: Boolean = false)
+    fun update(viewId: View = View(0), ignoreCameraPosition: Boolean = false)
     fun dispose()
 }

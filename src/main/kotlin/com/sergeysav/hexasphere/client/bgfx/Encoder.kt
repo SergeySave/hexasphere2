@@ -13,6 +13,10 @@ inline class Encoder(val handle: Long) {
         BGFX.bgfx_encoder_set_vertex_buffer(handle, stream, vertexBuffer.handle, offset, numVertices, vertexLayout.handle)
     }
 
+    fun setVertexBuffer(vertexBuffer: DynamicVertexBuffer, vertexLayout: VertexLayoutHandle, numVertices: Int, stream: Int = 0, offset: Int = 0) {
+        BGFX.bgfx_encoder_set_dynamic_vertex_buffer(handle, stream, vertexBuffer.handle, offset, numVertices, vertexLayout.handle)
+    }
+
     fun setVertexBuffer(vertexBuffer: TransientVertexBuffer, vertexLayout: VertexLayoutHandle, numVertices: Int, stream: Int = 0, offset: Int = 0) {
         BGFX.bgfx_encoder_set_transient_vertex_buffer(handle, stream, vertexBuffer.handle, offset, numVertices, vertexLayout.handle)
     }

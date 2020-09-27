@@ -1,8 +1,9 @@
 package com.sergeysav.hexasphere.client.window.screen
 
+import com.sergeysav.hexasphere.client.input.Action
 import com.sergeysav.hexasphere.client.input.Key
-import com.sergeysav.hexasphere.client.input.KeyAction
 import com.sergeysav.hexasphere.client.input.KeyModifiers
+import com.sergeysav.hexasphere.client.input.MouseButton
 
 interface Screen {
 
@@ -16,5 +17,9 @@ interface Screen {
 
     fun dispose()
 
-    fun onKey(keyAction: KeyAction, key: Key, keyModifiers: KeyModifiers) { }
+    fun onKey(action: Action, key: Key, keyModifiers: KeyModifiers) { }
+
+    fun onMouseButton(action: Action, mouseButton: MouseButton, keyModifiers: KeyModifiers) { }
+
+    fun onMouseMove(x: Double, y: Double, reset: Boolean) { }
 }

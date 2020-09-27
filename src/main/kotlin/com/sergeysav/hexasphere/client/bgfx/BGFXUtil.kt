@@ -3,8 +3,7 @@ package com.sergeysav.hexasphere.client.bgfx
 import mu.KotlinLogging
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.bgfx.BGFXReleaseFunctionCallback
-import org.lwjgl.system.MemoryUtil.nmemFree
-
+import org.lwjgl.system.MemoryUtil
 
 object BGFXUtil {
 
@@ -12,7 +11,7 @@ object BGFXUtil {
     var renderer: Int = 0
     var zZeroToOne = false
     val releaseMemoryCb = BGFXReleaseFunctionCallback.create { pointer: Long, _: Long ->
-        nmemFree(pointer)
+        MemoryUtil.nmemFree(pointer)
     }
     var texelHalf: Float = 0f
     var reset: Int = 0
