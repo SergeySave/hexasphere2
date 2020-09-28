@@ -22,4 +22,6 @@ interface Screen {
     fun onMouseButton(action: Action, mouseButton: MouseButton, keyModifiers: KeyModifiers) { }
 
     fun onMouseMove(x: Double, y: Double, reset: Boolean) { }
+
+    fun onScroll(x: Double, y: Double) { }
 }

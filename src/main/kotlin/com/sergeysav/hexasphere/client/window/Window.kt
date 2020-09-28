@@ -63,6 +63,7 @@ class Window(
             GLFW.glfwSetKeyCallback(window, this::onKey)
             GLFW.glfwSetMouseButtonCallback(window, this::onMouseButton)
             GLFW.glfwSetCursorPosCallback(window, this::onMouseMove)
+            GLFW.glfwSetScrollCallback(window, this::onScroll)
 
             logger.trace { "Setting BGFX Platform Data" }
             val bgfxPlatformData = BGFXPlatformData.callocStack(stack)
@@ -261,6 +262,14 @@ class Window(
                 else -> throw WindowException("Unknown Mouse Action")
             }, MouseButton.fromGLFWCode(button), this.modifiers
         )
+    }
+
+    private fun onScroll(
+        @Suppress("UNUSED_PARAMETER") window: Long,
+        x: Double,
+        y: Double
+    ) {
+        peekScreen().onScroll(x, y)
     }
 
     private fun onMouseMove(

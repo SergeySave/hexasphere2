@@ -45,7 +45,7 @@ inline class Encoder(val handle: Long) {
 
         const val DEFAULT = BGFX.BGFX_STATE_WRITE_MASK or
                 BGFX.BGFX_STATE_DEPTH_TEST_LESS or
-                BGFX.BGFX_STATE_CULL_CW or
+                BGFX.BGFX_STATE_CULL_CCW or
                 BGFX.BGFX_STATE_MSAA
         const val SKYBOX = BGFX.BGFX_STATE_WRITE_RGB or BGFX.BGFX_STATE_WRITE_A or
                 BGFX.BGFX_STATE_DEPTH_TEST_LEQUAL or

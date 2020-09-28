@@ -53,4 +53,10 @@ class SkyboxRenderSystem(fileName: String, private val view: View) : BaseSystem(
             skyboxMesh.render(this, model, view.id)
         }
     }
+
+    override fun dispose() {
+        skyboxTexture.dispose()
+        texCubeSampler.dispose()
+        skyboxMesh.dispose()
+    }
 }

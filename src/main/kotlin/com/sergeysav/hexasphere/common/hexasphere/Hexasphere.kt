@@ -76,11 +76,11 @@ class Hexasphere private constructor(
 
 fun Hexasphere.Companion.withSubdivisionLevel(level: Int) = fromDualOf(Icosahedron.subdivide(level, true))
 
+fun ArchetypeBuilder.addComponents() = this.add(TileComponent::class.java)
+
 fun Hexasphere.addToWorld(world: World, tileEntityMap: Map<HexasphereTile, Int>? = null) {
     val map = tileEntityMap ?: run {
-        val archetype = ArchetypeBuilder()
-            .add(TileComponent::class.java)
-            .build(world)
+        val archetype = ArchetypeBuilder().addComponents().build(world)
         val tempMap = mutableMapOf<HexasphereTile, Int>()
 
         for (tile in tiles) {

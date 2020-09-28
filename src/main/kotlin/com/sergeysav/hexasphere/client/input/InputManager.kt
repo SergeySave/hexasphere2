@@ -14,6 +14,8 @@ class InputManager {
     private var mouseY: Double = 0.0
     private var lastMouseX: Double = 0.0
     private var lastMouseY: Double = 0.0
+    private var scrollX: Double = 0.0
+    private var scrollY: Double = 0.0
 
     fun isKeyDown(key: Key) = keysDown.contains(key)
     fun isKeyJustDown(key: Key) = keysJustDown.contains(key)
@@ -32,6 +34,9 @@ class InputManager {
     fun getMouseDX() = mouseX - lastMouseX
     fun getMouseDY() = mouseY - lastMouseY
 
+    fun getScrollX() = scrollX
+    fun getScrollY() = scrollY
+
     fun update() {
         keysJustDown.clear()
         keysJustUp.clear()
@@ -41,6 +46,9 @@ class InputManager {
 
         lastMouseX = mouseX
         lastMouseY = mouseY
+
+        scrollX = 0.0
+        scrollY = 0.0
     }
 
     fun handleOnKey(action: Action, key: Key, keyModifiers: KeyModifiers) {
@@ -78,5 +86,10 @@ class InputManager {
             lastMouseX = x
             lastMouseY = y
         }
+    }
+
+    fun onScroll(x: Double, y: Double) {
+        scrollX = x
+        scrollY = y
     }
 }

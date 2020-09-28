@@ -67,7 +67,10 @@ class PerspectiveCamera(
     }
     override fun rotateAround(center: Vector3fc, axis: Vector3fc, radians: Float) {
         // position = (position - center).rotate(radians around axis) + center
-        position.sub(center, vec3).rotateAxis(radians, axis.x(), axis.y(), axis.z()).add(center, position)
+        position.sub(center, vec3)
+        val length = vec3.length()
+        // This rotation isn't perfect so it is necessary to normalize after
+        vec3.rotateAxis(radians, axis.x(), axis.y(), axis.z()).normalize(length).add(center, position)
         lookAt(center)
     }
     override fun lookAt(target: Vector3fc) {
@@ -77,7 +80,6 @@ class PerspectiveCamera(
     }
 
     override fun projectToWorld(input: Vector2fc, output: Vector3f): Vector3f {
-
         vec4.set(input.x(), -input.y(), 1f, 1f)
                 .mul(proj.mul(view, mat4).invert())
         return output.set(vec4.x / vec4.w, vec4.y / vec4.w, vec4.z / vec4.w).sub(position).normalize()
