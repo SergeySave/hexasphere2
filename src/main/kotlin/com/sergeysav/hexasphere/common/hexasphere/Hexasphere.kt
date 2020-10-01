@@ -5,7 +5,10 @@ import com.artemis.World
 import com.artemis.managers.GroupManager
 import com.sergeysav.hexasphere.common.game.Groups
 import com.sergeysav.hexasphere.common.game.tile.TileComponent
-import com.sergeysav.hexasphere.common.game.tile.type.OceanTileTypeComponent
+import com.sergeysav.hexasphere.common.game.tile.feature.CityFeatureComponent
+import com.sergeysav.hexasphere.common.game.tile.type.GrasslandTileTypeComponent
+import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
+import com.sergeysav.hexasphere.common.game.tile.type.setType
 import com.sergeysav.hexasphere.common.icosahedron.Icosahedron
 import com.sergeysav.hexasphere.common.icosahedron.SubdividedIcosahedron
 import com.sergeysav.hexasphere.common.icosahedron.Triangle
@@ -93,7 +96,13 @@ fun Hexasphere.addToWorld(world: World, tileEntityMap: Map<HexasphereTile, Int>?
 
     val tileMapper = world.getMapper(TileComponent::class.java)
     val groupSystem = world.getSystem(GroupManager::class.java)
-    val oceanMapper = world.getMapper(OceanTileTypeComponent::class.java)
+    val tileTypeSystem = world.getSystem(TileTypeSystem::class.java)
+    val cityMapper = world.getMapper(CityFeatureComponent::class.java)
+
+    for (i in 0 until 8) {
+        val tile = map.values.random()
+        cityMapper.create(tile)
+    }
 
     for (tileIdx in tiles.indices) {
         groupSystem.add(tileIdx, Groups.DIRTY_TILE)
@@ -103,6 +112,6 @@ fun Hexasphere.addToWorld(world: World, tileEntityMap: Map<HexasphereTile, Int>?
                 this.adjacent.add(map[tiles[tileIdx]] ?: error("This should be impossible"))
             }
         }
-        oceanMapper.create(tileIdx)
+        tileTypeSystem.setType<GrasslandTileTypeComponent>(tileIdx)
     }
 }

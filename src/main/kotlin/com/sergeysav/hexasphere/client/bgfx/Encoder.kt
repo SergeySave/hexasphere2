@@ -1,11 +1,16 @@
 package com.sergeysav.hexasphere.client.bgfx
 
 import org.lwjgl.bgfx.BGFX
+import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 
 inline class Encoder(val handle: Long) {
 
     fun setTransform(buffer: FloatBuffer) {
+        BGFX.bgfx_encoder_set_transform(handle, buffer)
+    }
+
+    fun setTransform(buffer: ByteBuffer) {
         BGFX.bgfx_encoder_set_transform(handle, buffer)
     }
 
@@ -37,6 +42,10 @@ inline class Encoder(val handle: Long) {
         BGFX.bgfx_encoder_set_uniform(handle, uniform.handle, buffer, count)
     }
 
+    fun setInstanceBuffer(instanceBuffer: InstanceBuffer, num: Int, start: Int = 0) {
+        BGFX.bgfx_encoder_set_instance_data_buffer(handle, instanceBuffer.handle, start, num)
+    }
+
     fun submit(program: ShaderProgram, id: Int = 0, depth: Int = 0, preserveState: Boolean = false) {
         BGFX.bgfx_encoder_submit(handle, id, program.handle, depth, preserveState)
     }
@@ -46,6 +55,10 @@ inline class Encoder(val handle: Long) {
         const val DEFAULT = BGFX.BGFX_STATE_WRITE_MASK or
                 BGFX.BGFX_STATE_DEPTH_TEST_LESS or
                 BGFX.BGFX_STATE_CULL_CCW or
+                BGFX.BGFX_STATE_MSAA
+        const val DEFAULT_CW = BGFX.BGFX_STATE_WRITE_MASK or
+                BGFX.BGFX_STATE_DEPTH_TEST_LESS or
+                BGFX.BGFX_STATE_CULL_CW or
                 BGFX.BGFX_STATE_MSAA
         const val SKYBOX = BGFX.BGFX_STATE_WRITE_RGB or BGFX.BGFX_STATE_WRITE_A or
                 BGFX.BGFX_STATE_DEPTH_TEST_LEQUAL or

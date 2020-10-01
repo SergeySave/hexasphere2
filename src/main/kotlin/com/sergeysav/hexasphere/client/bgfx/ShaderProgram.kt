@@ -5,7 +5,9 @@ import org.lwjgl.bgfx.BGFX
 inline class ShaderProgram(val handle: Short = 0) {
 
     fun dispose() {
-        BGFX.bgfx_destroy_program(handle)
+        if (handle != 0.toShort()) {
+            BGFX.bgfx_destroy_program(handle)
+        }
     }
 
     companion object {

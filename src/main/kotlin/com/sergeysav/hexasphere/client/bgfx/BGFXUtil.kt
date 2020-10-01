@@ -3,6 +3,7 @@ package com.sergeysav.hexasphere.client.bgfx
 import mu.KotlinLogging
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.bgfx.BGFXReleaseFunctionCallback
+import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryUtil
 
 object BGFXUtil {
@@ -13,11 +14,15 @@ object BGFXUtil {
     val releaseMemoryCb = BGFXReleaseFunctionCallback.create { pointer: Long, _: Long ->
         MemoryUtil.nmemFree(pointer)
     }
+    val stbImageReleaseMemoryCb = BGFXReleaseFunctionCallback.create { pointer: Long, _: Long ->
+        STBImage.nstbi_image_free(pointer)
+    }
     var texelHalf: Float = 0f
     var reset: Int = 0
 
     fun dispose() {
         releaseMemoryCb.free()
+        stbImageReleaseMemoryCb.free()
     }
 
     fun getSupportedRenderers(): IntArray {

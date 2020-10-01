@@ -10,7 +10,7 @@ import com.sergeysav.hexasphere.client.bgfx.set
 import com.sergeysav.hexasphere.client.camera.Camera3d
 import com.sergeysav.hexasphere.client.game.skybox.SkyboxRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.HexasphereRenderSystem
-import com.sergeysav.hexasphere.client.game.tile.TestFeaturePositionRenderSystem
+import com.sergeysav.hexasphere.client.game.tile.feature.CityRenderSystem
 import com.sergeysav.hexasphere.client.hexasphere.clientAddToWorld
 import com.sergeysav.hexasphere.client.input.Action
 import com.sergeysav.hexasphere.client.input.InputManager
@@ -25,6 +25,7 @@ import com.sergeysav.hexasphere.common.game.Game
 import com.sergeysav.hexasphere.common.game.tile.TileSystem
 import com.sergeysav.hexasphere.common.game.tile.type.CoastTileTypeComponent
 import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
+import com.sergeysav.hexasphere.common.game.tile.type.setType
 import com.sergeysav.hexasphere.common.hexasphere.Hexasphere
 import com.sergeysav.hexasphere.common.hexasphere.withSubdivisionLevel
 import org.joml.Vector2f
@@ -56,7 +57,7 @@ class HSScreen : Screen {
                 ShaderProgram.loadFromFiles("cube/vs_cubes", "cube/fs_cubes"))
             )
             with(SkyboxRenderSystem("/skybox/nasa2k.ktx", skyboxView))
-            with(TestFeaturePositionRenderSystem(featuresView))
+            with(CityRenderSystem(featuresView))
         }
         tileSystem = world.getSystem(TileSystem::class.java)
         tileTypeSystem = world.getSystem(TileTypeSystem::class.java)
@@ -123,7 +124,7 @@ class HSScreen : Screen {
             if (SphereRayIntersect.computeIntersection(direction, camera!!.position, Vectors.ZERO3f, 1.0, vec3b) != null) {
                 val bestTile = tileSystem.getClosestTile(vec3b)
                 if (bestTile != -1) {
-                    tileTypeSystem.setTileType(bestTile, CoastTileTypeComponent::class.java)
+                    tileTypeSystem.setType<CoastTileTypeComponent>(bestTile)
                 }
             }
         }

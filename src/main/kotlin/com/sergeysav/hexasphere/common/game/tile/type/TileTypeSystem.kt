@@ -12,28 +12,38 @@ import com.sergeysav.hexasphere.common.game.Groups
 class TileTypeSystem : BaseSystem() {
 
     private lateinit var groupManager: GroupManager
-    private lateinit var oceanMapper: ComponentMapper<OceanTileTypeComponent>
-    private lateinit var coastMapper: ComponentMapper<CoastTileTypeComponent>
-
     private lateinit var mappers: Bag<ComponentMapper<out Component>>
     private lateinit var transmuters: Map<Class<out Component>, EntityTransmuter>
 
+    // ADD NEW TILE TYPES HERE
     private fun createBaseFactory() = EntityTransmuterFactory(world)
         .remove(OceanTileTypeComponent::class.java)
         .remove(CoastTileTypeComponent::class.java)
+        .remove(GrasslandTileTypeComponent::class.java)
 
     override fun initialize() {
         super.initialize()
-
-        this.mappers = Bag<ComponentMapper<out Component>>().apply {
-            add(oceanMapper)
-            add(coastMapper)
+        this.mappers = Bag<ComponentMapper<out Component>>().also { bag ->
+            this.transmuters = mutableMapOf<Class<out Component>, EntityTransmuter>().also { map ->
+                // ADD NEW TILE TYPES HERE
+                add<OceanTileTypeComponent>(bag, map)
+                add<CoastTileTypeComponent>(bag, map)
+                add<GrasslandTileTypeComponent>(bag, map)
+            }
         }
+    }
 
-        this.transmuters = mutableMapOf<Class<out Component>, EntityTransmuter>().apply {
-            this[OceanTileTypeComponent::class.java] = createBaseFactory().add(OceanTileTypeComponent::class.java).build()
-            this[CoastTileTypeComponent::class.java] = createBaseFactory().add(CoastTileTypeComponent::class.java).build()
-        }
+    private inline fun <reified T : Component> MutableMap<Class<out Component>, EntityTransmuter>.addTransmuter() {
+        this[T::class.java] = createBaseFactory().add(T::class.java).build()
+    }
+
+    private inline fun <reified T : Component> Bag<ComponentMapper<out Component>>.addMapper() {
+        add(world.getMapper(T::class.java))
+    }
+
+    private inline fun <reified T : Component> add(bag: Bag<ComponentMapper<out Component>>, map: MutableMap<Class<out Component>, EntityTransmuter>) {
+        bag.addMapper<T>()
+        map.addTransmuter<T>()
     }
 
     fun getTileType(tileEntity: Int): TileType? {
@@ -55,3 +65,5 @@ class TileTypeSystem : BaseSystem() {
         isEnabled = false
     }
 }
+
+inline fun <reified T : Component> TileTypeSystem.setType(tileEntity: Int) = setTileType(tileEntity, T::class.java)

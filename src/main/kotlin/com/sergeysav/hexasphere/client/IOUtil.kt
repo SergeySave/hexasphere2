@@ -1,11 +1,14 @@
 package com.sergeysav.hexasphere.client
 
+import com.sergeysav.hexasphere.common.hexasphere.Hexasphere
 import mu.KotlinLogging
 import org.lwjgl.system.MemoryUtil
 import java.io.BufferedInputStream
 import java.io.IOException
 import java.net.URL
 import java.nio.ByteBuffer
+import java.nio.file.Files
+import java.nio.file.Paths
 
 object IOUtil {
 
@@ -28,5 +31,21 @@ object IOUtil {
         }
         resource.flip()
         return resource
+    }
+
+    fun getResourcePath(resource: String): String {
+        val path = Paths.get(resource)
+        return if (Files.isReadable(path)) {
+            path.toAbsolutePath().toString()
+        } else {
+            Hexasphere::class.java.getResource(resource).path
+        }
+    }
+
+    fun doesResourceExist(resource: String): Boolean = try {
+        getResourcePath(resource)
+        true
+    } catch (e: IllegalStateException) {
+        false
     }
 }

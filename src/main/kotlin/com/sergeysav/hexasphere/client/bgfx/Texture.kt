@@ -4,7 +4,6 @@ import com.sergeysav.hexasphere.client.IOUtil
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.system.MemoryUtil
 
-
 inline class Texture(val handle: Short) {
 
     fun dispose() {

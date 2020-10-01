@@ -1,3 +1,4 @@
+$input v_texcoord0
 
 /*
  * Copyright 2011-2020 Branimir Karadzic. All rights reserved.
@@ -6,9 +7,9 @@
 
 #include "../common.shaderh"
 
-uniform vec4 u_color;
+SAMPLER2D(s_diffuse1, 0);
 
 void main()
 {
-	gl_FragColor = u_color;// vec4(1.0, 0.5, 0.0, 1.0);
+	gl_FragColor = vec4(texture2D(s_diffuse1, v_texcoord0).xyz, 1.0);
 }

@@ -5,6 +5,7 @@ import com.artemis.WorldConfigurationBuilder
 import com.artemis.managers.GroupManager
 import com.sergeysav.hexasphere.common.game.tile.TileCleanerSystem
 import com.sergeysav.hexasphere.common.game.tile.TileSystem
+import com.sergeysav.hexasphere.common.game.tile.feature.TileFeatureSystem
 import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
 
 object Game {
@@ -16,6 +17,7 @@ object Game {
             .with(TileCleanerSystem())
             .with(TileTypeSystem())
             .with(TileSystem())
+            .with(TileFeatureSystem())
             .build()
         return World(configuration)
     }
