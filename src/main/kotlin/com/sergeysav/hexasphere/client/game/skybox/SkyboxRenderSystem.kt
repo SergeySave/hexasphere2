@@ -8,7 +8,7 @@ import com.sergeysav.hexasphere.client.bgfx.Uniform
 import com.sergeysav.hexasphere.client.bgfx.VertexAttribute
 import com.sergeysav.hexasphere.client.bgfx.VertexLayout
 import com.sergeysav.hexasphere.client.bgfx.View
-import com.sergeysav.hexasphere.client.ui.StaticMesh
+import com.sergeysav.hexasphere.client.mesh.StaticMesh
 import org.joml.Matrix4f
 import org.lwjgl.system.MemoryUtil
 

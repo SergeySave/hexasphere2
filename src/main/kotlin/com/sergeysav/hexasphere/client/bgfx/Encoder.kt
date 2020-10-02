@@ -30,6 +30,14 @@ inline class Encoder(val handle: Long) {
         BGFX.bgfx_encoder_set_index_buffer(handle, indexBuffer.handle, offset, numIndices)
     }
 
+    fun setIndexBuffer(indexBuffer: DynamicIndexBuffer, numIndices: Int, offset: Int = 0) {
+        BGFX.bgfx_encoder_set_dynamic_index_buffer(handle, indexBuffer.handle, offset, numIndices)
+    }
+
+    fun setIndexBuffer(indexBuffer: TransientIndexBuffer, numIndices: Int, offset: Int = 0) {
+        BGFX.bgfx_encoder_set_transient_index_buffer(handle, indexBuffer.handle, offset, numIndices)
+    }
+
     fun setState(state: Long, rgba: Int = 0) {
         BGFX.bgfx_encoder_set_state(handle, state, rgba)
     }
@@ -46,8 +54,10 @@ inline class Encoder(val handle: Long) {
         BGFX.bgfx_encoder_set_instance_data_buffer(handle, instanceBuffer.handle, start, num)
     }
 
-    fun submit(program: ShaderProgram, id: Int = 0, depth: Int = 0, preserveState: Boolean = false) {
-        BGFX.bgfx_encoder_submit(handle, id, program.handle, depth, preserveState)
+    fun submit(program: ShaderProgram, id: Int = 0, depth: Int = 0, preserveState: Boolean = false) = submit(program, View(id), depth, preserveState)
+
+    fun submit(program: ShaderProgram, view: View = View(0), depth: Int = 0, preserveState: Boolean = false) {
+        BGFX.bgfx_encoder_submit(handle, view.id, program.handle, depth, preserveState)
     }
 
     companion object {
@@ -64,6 +74,12 @@ inline class Encoder(val handle: Long) {
                 BGFX.BGFX_STATE_DEPTH_TEST_LEQUAL or
                 BGFX.BGFX_STATE_CULL_CW or
                 BGFX.BGFX_STATE_MSAA
+        const val DEBUG = BGFX.BGFX_STATE_WRITE_MASK or
+                BGFX.BGFX_STATE_DEPTH_TEST_LESS
+        val TEXT = BGFX.BGFX_STATE_WRITE_RGB or BGFX.BGFX_STATE_WRITE_A or
+                BGFX.BGFX_STATE_MSAA or
+                BGFX.BGFX_STATE_CULL_CCW or
+                BGFX.BGFX_STATE_BLEND_ALPHA
 
         inline fun <T> with(forThread: Boolean = false, inner: Encoder.()->T): T {
             val encoder = Encoder(BGFX.bgfx_encoder_begin(forThread))

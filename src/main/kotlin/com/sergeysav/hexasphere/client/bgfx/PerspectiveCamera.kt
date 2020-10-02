@@ -1,6 +1,5 @@
 package com.sergeysav.hexasphere.client.bgfx
 
-import com.sergeysav.hexasphere.client.camera.Camera3d
 import org.joml.Matrix3f
 import org.joml.Matrix4f
 import org.joml.Matrix4fc
@@ -15,14 +14,14 @@ import java.nio.FloatBuffer
 class PerspectiveCamera(
         private var fovy: Float = 0f,
         private var aspect: Float = 0f,
-        override var zNear: Float = 0f,
-        override var zFar: Float = 0f
-) : Camera3d {
+        var zNear: Float = 0f,
+        var zFar: Float = 0f
+) {
 
-    override val position = Vector3f(0f, 0f, 0f)
-    override val forward = Vector3f(1f, 0f, 0f)
-    override val up = Vector3f(0f, 1f, 0f)
-    override val right = Vector3f(0f, 0f, 1f)
+    val position = Vector3f(0f, 0f, 0f)
+    val forward = Vector3f(1f, 0f, 0f)
+    val up = Vector3f(0f, 1f, 0f)
+    val right = Vector3f(0f, 0f, 1f)
     val viewMatrix: Matrix4fc
         get() = view
     val projectionMatrix: Matrix4fc
@@ -39,33 +38,33 @@ class PerspectiveCamera(
     private var projBuf: FloatBuffer = MemoryUtil.memAllocFloat(16)
 
     // Camera Settings
-    override fun setFovDeg(degrees: Float) = setFovRad(Math.toRadians(degrees.toDouble()).toFloat())
-    override fun setFovRad(radians: Float) {
+    fun setFovDeg(degrees: Float) = setFovRad(Math.toRadians(degrees.toDouble()).toFloat())
+    fun setFovRad(radians: Float) {
         fovy = radians
     }
-    override fun setAspect(width: Int, height: Int) {
+    fun setAspect(width: Int, height: Int) {
         aspect = width.toFloat() / height
     }
 
     // Camera Location
-    override fun setPosition(position: Vector3fc) {
+    fun setPosition(position: Vector3fc) {
         this.position.set(position)
     }
-    override fun translate(translation: Vector3fc) {
+    fun translate(translation: Vector3fc) {
         this.position.add(translation)
     }
-    override fun translateIn(direction: Vector3fc, amount: Float) {
+    fun translateIn(direction: Vector3fc, amount: Float) {
         position.add(direction.mul(amount, vec3))
     }
 
     // Camera Orientation
-    override fun rotate(axis: Vector3fc, radians: Float) {
+    fun rotate(axis: Vector3fc, radians: Float) {
         mat3.set(forward, up, right).transpose().rotate(radians, axis).transpose()
         mat3.getColumn(0, forward)
         mat3.getColumn(1, up)
         mat3.getColumn(2, right)
     }
-    override fun rotateAround(center: Vector3fc, axis: Vector3fc, radians: Float) {
+    fun rotateAround(center: Vector3fc, axis: Vector3fc, radians: Float) {
         // position = (position - center).rotate(radians around axis) + center
         position.sub(center, vec3)
         val length = vec3.length()
@@ -73,20 +72,20 @@ class PerspectiveCamera(
         vec3.rotateAxis(radians, axis.x(), axis.y(), axis.z()).normalize(length).add(center, position)
         lookAt(center)
     }
-    override fun lookAt(target: Vector3fc) {
+    fun lookAt(target: Vector3fc) {
         target.sub(position, forward).normalize() // direction = normalize(target - position)
         forward.cross(up, right).normalize() // right = normalize(direction X up)
         right.cross(forward, up).normalize() // up = normalize(right X direction)
     }
 
-    override fun projectToWorld(input: Vector2fc, output: Vector3f): Vector3f {
+    fun projectToWorld(input: Vector2fc, output: Vector3f): Vector3f {
         vec4.set(input.x(), -input.y(), 1f, 1f)
                 .mul(proj.mul(view, mat4).invert())
         return output.set(vec4.x / vec4.w, vec4.y / vec4.w, vec4.z / vec4.w).sub(position).normalize()
     }
 
     // Camera Lifecycle
-    override fun update(viewId: View, ignoreCameraPosition: Boolean) {
+    fun update(viewId: View, ignoreCameraPosition: Boolean = false) {
         proj.setPerspective(fovy, aspect, zNear, zFar, BGFXUtil.zZeroToOne)
         if (ignoreCameraPosition) {
             view.setLookAt(vec3.zero(), forward, up)
@@ -97,7 +96,7 @@ class PerspectiveCamera(
         }
     }
 
-    override fun dispose() {
+    fun dispose() {
         MemoryUtil.memFree(viewBuf)
         MemoryUtil.memFree(projBuf)
     }

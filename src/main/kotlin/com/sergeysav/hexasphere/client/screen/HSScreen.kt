@@ -1,13 +1,16 @@
 package com.sergeysav.hexasphere.client.screen
 
 import com.artemis.World
+import com.sergeysav.hexasphere.client.IOUtil
+import com.sergeysav.hexasphere.client.bgfx.Encoder
 import com.sergeysav.hexasphere.client.bgfx.Framebuffer
+import com.sergeysav.hexasphere.client.bgfx.OrthographicCamera
 import com.sergeysav.hexasphere.client.bgfx.PerspectiveCamera
 import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
 import com.sergeysav.hexasphere.client.bgfx.View
 import com.sergeysav.hexasphere.client.bgfx.ViewArray
 import com.sergeysav.hexasphere.client.bgfx.set
-import com.sergeysav.hexasphere.client.camera.Camera3d
+import com.sergeysav.hexasphere.client.font.Font
 import com.sergeysav.hexasphere.client.game.skybox.SkyboxRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.HexasphereRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.feature.CityRenderSystem
@@ -28,8 +31,11 @@ import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
 import com.sergeysav.hexasphere.common.game.tile.type.setType
 import com.sergeysav.hexasphere.common.hexasphere.Hexasphere
 import com.sergeysav.hexasphere.common.hexasphere.withSubdivisionLevel
+import com.sergeysav.hexasphere.common.setColor
 import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.Vector4f
+import java.util.Random
 import kotlin.math.pow
 
 class HSScreen : Screen {
@@ -37,19 +43,24 @@ class HSScreen : Screen {
     private lateinit var world: World
     private lateinit var tileSystem: TileSystem
     private lateinit var tileTypeSystem: TileTypeSystem
-    private var camera: Camera3d? = null
+    private lateinit var font: Font
+    private var camera: PerspectiveCamera? = null
+    private var fontCamera: OrthographicCamera? = null
     private var time: Double = 0.0
     private val inputManager = InputManager()
     private val vec2 = Vector2f()
     private val vec3a = Vector3f()
     private val vec3b = Vector3f()
+    private val vec4 = Vector4f()
     private val hexasphereView = View(0)
     private val skyboxView = View(1)
     private val featuresView = View(2)
-    private val views: ViewArray = intArrayOf(hexasphereView.id, featuresView.id, skyboxView.id)
+    private val uiView = View(3)
+    private val views: ViewArray = intArrayOf(hexasphereView.id, featuresView.id, skyboxView.id, uiView.id)
+    private val random = Random()
 
     override fun create() {
-        val hex = Hexasphere.withSubdivisionLevel(10)
+        val hex = Hexasphere.withSubdivisionLevel(3)
 
         world = Game.create {
             with(
@@ -69,6 +80,10 @@ class HSScreen : Screen {
             setPosition(vec3a.set(2f, 0f, 0f))
             lookAt(vec3a.set(0f, 0f, 0f))
         }
+
+        font = Font(IOUtil.loadResource("/font/OpenSans/OpenSans-Regular.ttf"), 24.1f, 512)
+
+        fontCamera = OrthographicCamera(0.0, 0.0,  0.0, 0.0, -1f, 1f)
     }
 
     override fun resume() {
@@ -81,6 +96,7 @@ class HSScreen : Screen {
         View.touch() // Touch view 0 to make sure everything renders
         skyboxView.set("Skybox", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT)
         featuresView.set("Features", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT)
+        uiView.set("UI", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT)
         View.setViewOrder(views)
 
         camera?.run {
@@ -132,6 +148,20 @@ class HSScreen : Screen {
         world.delta = delta.toFloat()
         world.process()
 
+        fontCamera?.run {
+            this.width = width.toDouble()
+            this.height = height.toDouble()
+            update(uiView)
+        }
+
+        Encoder.with {
+            val w = font.computeWidth("abcdefghijklmnopqrstuvwxyz")
+            val h = font.computeHeight("abcdefghijklmnopqrstuvwxyz")
+            val x = (width - w) / 2.0
+            val y = (height - h) / 2.0
+            font.render(this, uiView, x, y, "abcdefghijklmnopqrstuvwxyz", vec4.setColor(r=0x8F, g=0xAC, b=0xFF))
+        }
+
         inputManager.update()
         return ScreenAction.noop()
     }
@@ -143,6 +173,9 @@ class HSScreen : Screen {
         camera?.dispose()
         camera = null
         world.dispose()
+        fontCamera?.dispose()
+        fontCamera = null
+        font.dispose()
     }
 
     override fun onKey(action: Action, key: Key, keyModifiers: KeyModifiers) {

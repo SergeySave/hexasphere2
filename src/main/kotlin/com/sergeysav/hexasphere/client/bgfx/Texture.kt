@@ -7,7 +7,9 @@ import org.lwjgl.system.MemoryUtil
 inline class Texture(val handle: Short) {
 
     fun dispose() {
-        BGFX.bgfx_destroy_texture(handle)
+        if (handle != 0.toShort()) {
+            BGFX.bgfx_destroy_texture(handle)
+        }
     }
 
     companion object {

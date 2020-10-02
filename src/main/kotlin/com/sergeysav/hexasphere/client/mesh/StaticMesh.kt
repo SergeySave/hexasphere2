@@ -1,4 +1,4 @@
-package com.sergeysav.hexasphere.client.ui
+package com.sergeysav.hexasphere.client.mesh
 
 import com.sergeysav.hexasphere.client.bgfx.Encoder
 import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
