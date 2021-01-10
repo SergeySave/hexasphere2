@@ -10,7 +10,7 @@ import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
 import com.sergeysav.hexasphere.client.bgfx.View
 import com.sergeysav.hexasphere.client.bgfx.ViewArray
 import com.sergeysav.hexasphere.client.bgfx.set
-import com.sergeysav.hexasphere.client.font.Font
+import com.sergeysav.hexasphere.client.font.SDFFont
 import com.sergeysav.hexasphere.client.game.skybox.SkyboxRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.HexasphereRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.feature.CityRenderSystem
@@ -43,7 +43,7 @@ class HSScreen : Screen {
     private lateinit var world: World
     private lateinit var tileSystem: TileSystem
     private lateinit var tileTypeSystem: TileTypeSystem
-    private lateinit var font: Font
+    private lateinit var font: SDFFont
     private var camera: PerspectiveCamera? = null
     private var fontCamera: OrthographicCamera? = null
     private var time: Double = 0.0
@@ -52,6 +52,7 @@ class HSScreen : Screen {
     private val vec3a = Vector3f()
     private val vec3b = Vector3f()
     private val vec4 = Vector4f()
+    private val vec4b = Vector4f()
     private val hexasphereView = View(0)
     private val skyboxView = View(1)
     private val featuresView = View(2)
@@ -81,7 +82,7 @@ class HSScreen : Screen {
             lookAt(vec3a.set(0f, 0f, 0f))
         }
 
-        font = Font(IOUtil.loadResource("/font/OpenSans/OpenSans-Regular.ttf"), 24.1f, 512)
+        font = SDFFont(IOUtil.loadResource("/font/OpenSans/OpenSans-Regular.ttf"), pixelHeight = 60f, bitmapSize = 512)
 
         fontCamera = OrthographicCamera(0.0, 0.0,  0.0, 0.0, -1f, 1f)
     }
@@ -155,11 +156,19 @@ class HSScreen : Screen {
         }
 
         Encoder.with {
-            val w = font.computeWidth("abcdefghijklmnopqrstuvwxyz")
-            val h = font.computeHeight("abcdefghijklmnopqrstuvwxyz")
+
+            val scale = 1 / (font.computeWidth("abcdefghijklmn opqrstuvwxyz") / (width - 100)).toFloat()
+            val w = font.computeWidth("abcdefghijklmn opqrstuvwxyz") * scale
+            val h = font.computeHeight("abcdefghijklmn opqrstuvwxyz") * scale
             val x = (width - w) / 2.0
             val y = (height - h) / 2.0
-            font.render(this, uiView, x, y, "abcdefghijklmnopqrstuvwxyz", vec4.setColor(r=0x8F, g=0xAC, b=0xFF))
+            font.render(this, uiView, x, y, "abcdefghijklmn opqrstuvwxyz",
+                color = vec4.setColor(r=0xFF, g=0xFF, b=0xFF),
+                drawScale = scale,
+                extraThickness = 0f,
+                outlineColor = vec4b.setColor(r=0x00, g=0x00, b=0x00),
+                outlineThickness = 0f
+            )
         }
 
         inputManager.update()

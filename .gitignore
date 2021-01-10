@@ -17,3 +17,5 @@ core.*.dmp
 javacore.*.txt
 jitdump.*.dmp
 Snap.*.trc
+
+sdf.png

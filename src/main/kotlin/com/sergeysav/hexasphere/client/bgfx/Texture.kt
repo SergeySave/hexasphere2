@@ -1,6 +1,8 @@
 package com.sergeysav.hexasphere.client.bgfx
 
 import com.sergeysav.hexasphere.client.IOUtil
+import com.sergeysav.hexasphere.client.bgfx.BGFXException
+import com.sergeysav.hexasphere.client.bgfx.BGFXUtil
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.system.MemoryUtil
 
