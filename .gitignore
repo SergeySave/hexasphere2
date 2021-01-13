@@ -12,6 +12,10 @@ tools/macos/
 # Shader Outputs
 src/main/resources/shaders/
 
+# Skybox textures
+src/main/resources/skybox/nasa1k.ktx
+src/main/resources/skybox/nasa2k.ktx
+
 # Core Dumps
 core.*.dmp
 javacore.*.txt
