@@ -6,6 +6,7 @@ import com.sergeysav.hexasphere.common.color
 class OceanTileTypeComponent : PooledComponent(), TileType {
 
     override val color: Int = color(r = 0x07, g = 0x0b, b = 0x4a)
+    override val unlocalizedName = "tile.ocean.name"
 
     override fun reset() { }
 }

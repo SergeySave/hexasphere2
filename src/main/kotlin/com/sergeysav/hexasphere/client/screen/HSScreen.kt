@@ -1,6 +1,5 @@
 package com.sergeysav.hexasphere.client.screen
 
-import com.artemis.World
 import com.sergeysav.hexasphere.client.bgfx.Framebuffer
 import com.sergeysav.hexasphere.client.bgfx.PerspectiveCamera
 import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
@@ -10,6 +9,8 @@ import com.sergeysav.hexasphere.client.bgfx.set
 import com.sergeysav.hexasphere.client.font.FontManager
 import com.sergeysav.hexasphere.client.font.HAlign
 import com.sergeysav.hexasphere.client.font.VAlign
+import com.sergeysav.hexasphere.client.game.ClientGameManager
+import com.sergeysav.hexasphere.client.game.TileSelectionHelper
 import com.sergeysav.hexasphere.client.game.skybox.SkyboxRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.HexasphereRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.feature.CityRenderSystem
@@ -19,30 +20,21 @@ import com.sergeysav.hexasphere.client.input.InputManager
 import com.sergeysav.hexasphere.client.input.Key
 import com.sergeysav.hexasphere.client.input.KeyModifiers
 import com.sergeysav.hexasphere.client.input.MouseButton
-import com.sergeysav.hexasphere.client.math.SphereRayIntersect
+import com.sergeysav.hexasphere.client.localization.L10n
 import com.sergeysav.hexasphere.client.window.screen.Screen
 import com.sergeysav.hexasphere.client.window.screen.ScreenAction
-import com.sergeysav.hexasphere.common.Vectors
-import com.sergeysav.hexasphere.common.game.Game
-import com.sergeysav.hexasphere.common.game.tile.TileSystem
 import com.sergeysav.hexasphere.common.game.tile.type.CoastTileTypeComponent
-import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
 import com.sergeysav.hexasphere.common.game.tile.type.setType
 import com.sergeysav.hexasphere.common.hexasphere.Hexasphere
 import com.sergeysav.hexasphere.common.hexasphere.withSubdivisionLevel
 import com.sergeysav.hexasphere.common.setColor
 import org.joml.Vector2f
 import org.joml.Vector3f
-import org.joml.Vector4f
-import java.util.Random
 import kotlin.math.pow
-import kotlin.math.sin
 
 class HSScreen : Screen {
 
-    private lateinit var world: World
-    private lateinit var tileSystem: TileSystem
-    private lateinit var tileTypeSystem: TileTypeSystem
+    private lateinit var clientGameManager: ClientGameManager
     private var fontManager: FontManager? = null
     private var camera: PerspectiveCamera? = null
     private var time: Double = 0.0
@@ -50,30 +42,28 @@ class HSScreen : Screen {
     private val vec2 = Vector2f()
     private val vec3a = Vector3f()
     private val vec3b = Vector3f()
-    private val vec4 = Vector4f()
-    private val vec4b = Vector4f()
     private val hexasphereView = View(0)
     private val skyboxView = View(1)
     private val featuresView = View(2)
     private val uiView = View(3)
     private val views: ViewArray = intArrayOf(hexasphereView.id, featuresView.id, skyboxView.id, uiView.id)
-    private val random = Random()
+    private val mouseHoldDragTime = 0.1
 
     override fun create() {
         val hex = Hexasphere.withSubdivisionLevel(5)
 
-        world = Game.create {
+        clientGameManager = ClientGameManager {
             with(
-                HexasphereRenderSystem(hex.pentagons, hex.hexagons, hexasphereView,
-                ShaderProgram.loadFromFiles("cube/vs_cubes", "cube/fs_cubes"))
+                HexasphereRenderSystem(
+                    hex.pentagons, hex.hexagons, hexasphereView,
+                    ShaderProgram.loadFromFiles("cube/vs_cubes", "cube/fs_cubes")
+                )
             )
             with(SkyboxRenderSystem("/skybox/nasa2k.ktx", skyboxView))
             with(CityRenderSystem(featuresView))
         }
-        tileSystem = world.getSystem(TileSystem::class.java)
-        tileTypeSystem = world.getSystem(TileTypeSystem::class.java)
 
-        hex.clientAddToWorld(world)
+        hex.clientAddToWorld(clientGameManager.world)
 
         camera = PerspectiveCamera(zNear = 0.1f, zFar = 100f).apply {
             setFovDeg(45f)
@@ -82,6 +72,8 @@ class HSScreen : Screen {
         }
 
         fontManager = FontManager()
+
+        L10n.load("en_US")
     }
 
     override fun resume() {
@@ -130,34 +122,49 @@ class HSScreen : Screen {
             update(featuresView)
         }
 
+        val viewDirection = camera!!.projectToWorld(vec2.set(
+            (2 * inputManager.getMouseX() / width - 1).toFloat(),
+            (2 * inputManager.getMouseY() / height - 1).toFloat()
+        ), vec3a)
         if (inputManager.isMouseButtonJustUp(MouseButton.RIGHT)) {
-            val direction = camera!!.projectToWorld(vec2.set(
-                (2 * inputManager.getMouseX() / width - 1).toFloat(),
-                (2 * inputManager.getMouseY() / height - 1).toFloat()
-            ), vec3a)
-            if (SphereRayIntersect.computeIntersection(direction, camera!!.position, Vectors.ZERO3f, 1.0, vec3b) != null) {
-                val bestTile = tileSystem.getClosestTile(vec3b)
-                if (bestTile != -1) {
-                    tileTypeSystem.setType<CoastTileTypeComponent>(bestTile)
-                }
+            TileSelectionHelper.ifCouldSelectTile(clientGameManager, viewDirection, camera!!.position) { bestTile ->
+                clientGameManager.tileTypeSystem.setType<CoastTileTypeComponent>(bestTile)
+            }
+        }
+        if (inputManager.isMouseButtonJustUp(MouseButton.LEFT) && inputManager.getMouseButtonDownTime(MouseButton.LEFT) < mouseHoldDragTime) {
+            TileSelectionHelper.selectBestTileOrNone(clientGameManager, viewDirection, camera!!.position) { bestTile ->
+                clientGameManager.selectionSystem.selectedTile = bestTile
             }
         }
 
-        world.delta = delta.toFloat()
-        world.process()
-
-//        Encoder.with {
-//            DebugRender.fillQuad(this, uiView, Vector3f(0f, 0f, 0f), Vector3f(width.toFloat(), 0f, 0f), Vector3f(width.toFloat(), height / 2f, 0f), Vector3f(0f, height / 2f, 0f), color(0xFF, 0x00, 0x00))
-//        }
+        clientGameManager.process(delta / 1000.0)
 
         fontManager?.render(width.toDouble(), height.toDouble(), uiView) { encoder, _ ->
-            color.setColor(0xFF, 0xFF, 0xFF)
-            outlineColor.setColor(0x00, 0x00, 0x00)
-            encoder.drawFont("Hello\nWorld!", width / 2.0, height / 2.0, uiView, sin(time * 0.4).pow(2).toFloat() * 5,
-                hAlign = HAlign.CENTER, vAlign = VAlign.CENTER, outlineThickness = 0.3f, multiline = true)
+            val fontScale = 0.5f
+
+            encoder.drawFont(
+                buildString {
+                    append(String.format(L10n("ui.fps.format"), 1000.0/delta))
+                }, 0.0, height.toDouble() - font.getLineStep() * fontScale * 1, uiView, fontScale,
+                color.setColor(0xFF, 0xFF, 0xFF),
+                outlineColor.setColor(0x00, 0x00, 0x00),
+                hAlign = HAlign.LEFT, vAlign = VAlign.TOP, outlineThickness = 0.3f
+            )
+            encoder.drawFont(
+                buildString {
+                    append(String.format(L10n("ui.selected_tile.format"),
+                        L10n(TileSelectionHelper.getSelectedTileType(clientGameManager) { type ->
+                            type?.unlocalizedName ?: TileSelectionHelper.noTileUnlocalizedName
+                        })
+                    ))
+                }, 0.0, height.toDouble() - font.getLineStep() * fontScale * 2, uiView, fontScale,
+                color.setColor(0xFF, 0xFF, 0xFF),
+                outlineColor.setColor(0x00, 0x00, 0x00),
+                hAlign = HAlign.LEFT, vAlign = VAlign.TOP, outlineThickness = 0.3f
+            )
         }
 
-        inputManager.update()
+        inputManager.update(delta / 1000.0)
         return ScreenAction.noop()
     }
 
@@ -167,7 +174,7 @@ class HSScreen : Screen {
     override fun dispose() {
         camera?.dispose()
         camera = null
-        world.dispose()
+        if (::clientGameManager.isInitialized) clientGameManager.dispose()
         fontManager?.dispose()
     }
 

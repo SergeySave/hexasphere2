@@ -5,6 +5,7 @@ import com.sergeysav.hexasphere.client.bgfx.Encoder
 import com.sergeysav.hexasphere.client.bgfx.OrthographicCamera
 import com.sergeysav.hexasphere.client.bgfx.View
 import org.joml.Vector4f
+import org.joml.Vector4fc
 
 class FontManager {
 
@@ -32,6 +33,8 @@ class FontManager {
         y: Double,
         view: View,
         scale: Float,
+        color: Vector4fc = this@FontManager.color,
+        outlineColor: Vector4fc = this@FontManager.outlineColor,
         hAlign: HAlign = HAlign.LEFT,
         vAlign: VAlign = VAlign.CENTER,
         thickness: Float = 0f,

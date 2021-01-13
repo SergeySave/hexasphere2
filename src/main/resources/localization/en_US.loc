@@ -1,0 +1,8 @@
+
+ui.fps.format=FPS: %.0f
+ui.selected_tile.format=Selected Tile: %s
+
+tile.none.name=None
+tile.grassland.name=Grassland
+tile.coast.name=Coast
+tile.ocean.name=Ocean

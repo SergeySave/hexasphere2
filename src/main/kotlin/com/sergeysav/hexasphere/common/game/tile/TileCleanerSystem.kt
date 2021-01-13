@@ -9,8 +9,8 @@ class TileCleanerSystem : BaseSystem() {
     override fun processSystem() {
         val groupManager = world.getSystem(GroupManager::class.java)
         val entities = groupManager.getEntityIds(Groups.DIRTY_TILE)
-        for (i in 0 until entities.size()) {
-            groupManager.remove(i, Groups.DIRTY_TILE)
+        for (i in entities.size() - 1 downTo 0) {
+            groupManager.remove(entities[i], Groups.DIRTY_TILE)
         }
     }
 }

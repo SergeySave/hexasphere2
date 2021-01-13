@@ -30,7 +30,8 @@ class SDFFont(
     private val bitmapSize: Int,
     private val padding: Int = 5,
     private val onEdgeValue: Int = 180,
-    private val characters: String = DEFAULT_CHARACTERS
+    private val characters: String = DEFAULT_CHARACTERS,
+    debugSaveBitmap: String? = null
 ) : STBFont(ttf) {
 
     private val pixelDistScale: Float = onEdgeValue.toFloat() / padding
@@ -109,8 +110,10 @@ class SDFFont(
                 }
             }
 
-            STBImageWrite.stbi_flip_vertically_on_write(false)
-            STBImageWrite.stbi_write_png("sdf.png", bitmapSize, bitmapSize, 1, bitmap, bitmapSize)
+            debugSaveBitmap?.let {
+                STBImageWrite.stbi_flip_vertically_on_write(false)
+                STBImageWrite.stbi_write_png(it, bitmapSize, bitmapSize, 1, bitmap, bitmapSize)
+            }
 
             val format =  BGFX.BGFX_TEXTURE_FORMAT_R8
             val bgfxMemory = BGFX.bgfx_make_ref_release(bitmap, BGFXUtil.releaseMemoryCb, MemoryUtil.NULL)

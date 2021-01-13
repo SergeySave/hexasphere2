@@ -2,7 +2,7 @@ import groovy.io.FileType
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.21'
     id 'application'
 }
 group = 'com.sergeysav'
@@ -39,7 +39,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
-    implementation "net.onedaybeard.artemis:artemis-odb:$artemisVersion"
+    implementation("net.onedaybeard.artemis:artemis-odb:$artemisVersion")
 
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"

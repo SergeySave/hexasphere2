@@ -7,9 +7,10 @@ class InputManager {
     private val keysDown: EnumSet<Key> = EnumSet.noneOf(Key::class.java)
     private val keysJustDown: EnumSet<Key> = EnumSet.noneOf(Key::class.java)
     private val keysJustUp: EnumSet<Key> = EnumSet.noneOf(Key::class.java)
-    private val mouseButtonsDown: EnumSet<MouseButton> = EnumSet.noneOf(MouseButton::class.java)
+    private val mouseButtonsDown = BooleanArray(MouseButton.values().size) { false }//: EnumSet<MouseButton> = EnumSet.noneOf(MouseButton::class.java)
     private val mouseButtonsJustDown: EnumSet<MouseButton> = EnumSet.noneOf(MouseButton::class.java)
     private val mouseButtonsJustUp: EnumSet<MouseButton> = EnumSet.noneOf(MouseButton::class.java)
+    private val mouseButtonDownTime = DoubleArray(MouseButton.values().size) { 0.0 }
     private var mouseX: Double = 0.0
     private var mouseY: Double = 0.0
     private var lastMouseX: Double = 0.0
@@ -23,11 +24,12 @@ class InputManager {
     fun isKeyUp(key: Key) = !isKeyDown(key)
     fun getKeyDownInt(key: Key) = if (isKeyDown(key)) 1 else 0
 
-    fun isMouseButtonDown(button: MouseButton) = mouseButtonsDown.contains(button)
+    fun isMouseButtonDown(button: MouseButton) = mouseButtonsDown[button.ordinal]
     fun isMouseButtonJustDown(button: MouseButton) = mouseButtonsJustDown.contains(button)
     fun isMouseButtonJustUp(button: MouseButton) = mouseButtonsJustUp.contains(button)
     fun isMouseButtonUp(button: MouseButton) = !isMouseButtonDown(button)
     fun getMouseButtonDownInt(button: MouseButton) = if (isMouseButtonDown(button)) 1 else 0
+    fun getMouseButtonDownTime(button: MouseButton) = mouseButtonDownTime[button.ordinal]
 
     fun getMouseX() = mouseX
     fun getMouseY() = mouseY
@@ -37,7 +39,7 @@ class InputManager {
     fun getScrollX() = scrollX
     fun getScrollY() = scrollY
 
-    fun update() {
+    fun update(delta: Double) {
         keysJustDown.clear()
         keysJustUp.clear()
 
@@ -49,6 +51,14 @@ class InputManager {
 
         scrollX = 0.0
         scrollY = 0.0
+
+        for (i in mouseButtonDownTime.indices) {
+            if (mouseButtonsDown[i]) {
+                mouseButtonDownTime[i] += delta
+            } else {
+                mouseButtonDownTime[i] = 0.0
+            }
+        }
     }
 
     fun handleOnKey(action: Action, key: Key, keyModifiers: KeyModifiers) {
@@ -68,12 +78,15 @@ class InputManager {
     fun handleOnMouseButton(action: Action, button: MouseButton, keyModifiers: KeyModifiers) {
         when (action) {
             Action.RELEASE -> {
-                mouseButtonsDown.remove(button)
+//                mouseButtonsDown.remove(button)
+                mouseButtonsDown[button.ordinal] = false
                 mouseButtonsJustUp.add(button)
             }
             Action.PRESS -> {
-                mouseButtonsDown.add(button)
+//                mouseButtonsDown.add(button)
+                mouseButtonsDown[button.ordinal] = true
                 mouseButtonsJustDown.add(button)
+                mouseButtonDownTime[button.ordinal] = 0.0
             }
             Action.REPEAT -> { }
         }
