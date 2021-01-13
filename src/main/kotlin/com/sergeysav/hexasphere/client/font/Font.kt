@@ -26,6 +26,13 @@ interface Font {
     fun computeHeight(text: CharSequence): Double
 
     /**
+     * Get the step size between lines
+     *
+     * @return the step size between lines
+     */
+    fun getLineStep(): Double
+
+    /**
      * Dispose the resources for this font
      */
     fun dispose()

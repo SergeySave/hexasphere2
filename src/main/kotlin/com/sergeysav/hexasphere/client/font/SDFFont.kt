@@ -40,9 +40,13 @@ class SDFFont(
         MemoryStack.stackPush().use { stack ->
             scale = STBTruetype.stbtt_ScaleForPixelHeight(fontInfo, pixelHeight)
 
+            val a = stack.mallocInt(1)
             val d = stack.mallocInt(1)
-            STBTruetype.stbtt_GetFontVMetrics(fontInfo, null, d, null)
+            val lg = stack.mallocInt(1)
+            STBTruetype.stbtt_GetFontVMetrics(fontInfo, a, d, lg)
+            ascent = a.get(0) * scale
             descent = d.get(0) * scale
+            lineGap = lg.get(0) * scale
 
             val bitmap = MemoryUtil.memAlloc(bitmapSize * bitmapSize)
 
@@ -59,10 +63,10 @@ class SDFFont(
 
             val packingBuffer = STBRPRect.mallocStack(characters.length)
             for (i in characters.indices) {
-                STBTruetype.stbtt_GetCodepointSDF(
+                STBTruetype.stbtt_FreeSDF(STBTruetype.stbtt_GetCodepointSDF(
                     fontInfo, scale, characters[i].toInt(), padding,
                     onEdgeValue.toByte(), pixelDistScale, w, h, xoff, yoff
-                )
+                )!!)
                 packingBuffer[i].id(characters[i].toInt())
                     .w(w[0].toShort())
                     .h(h[0].toShort())
@@ -97,6 +101,8 @@ class SDFFont(
                             w[0], h[0],
                             xoff[0], yoff[0]
                         )
+
+                        STBTruetype.stbtt_FreeSDF(sdf)
                     } else {
                         println("Failed to pack codepoint $codepoint / ${codepoint.toChar()}")
                     }
@@ -116,7 +122,7 @@ class SDFFont(
         var height = 0.0
 
         for (char in text) {
-            height = maxOf(height, packData[char.toInt()]?.h?.toDouble() ?: 0.0)
+            height = maxOf(height, (packData[char.toInt()]?.h?.toDouble() ?: 0.0) - padding * 2)
         }
 
         return height
@@ -151,12 +157,10 @@ class SDFFont(
                     for (char in text) {
                         val pack = packData[char.toInt()]
                         STBTruetype.stbtt_GetCodepointHMetrics(fontInfo, char.toInt(), advance, bearing)
-                        val width = advance.get(0) * scale * drawScale
-                        val height = (pack?.h ?: 0) * drawScale
-                        val x1This = xPos + bearing.get(0) * scale * drawScale
-                        val y1This = yPos - ((pack?.y0 ?: 0) + descent * scale) * drawScale
+                        val x1This = xPos + bearing[0] * scale * drawScale //+ (bearing.get(0) - (pack?.x0 ?: 0)) * scale * drawScale
+                        val y1This = yPos + (descent * scale - (pack?.y0 ?: 0)) * drawScale //- ((pack?.y0 ?: 0) + descent * scale) * drawScale
                         val x2This = x1This + (pack?.w ?: 0) * drawScale
-                        val y2This = y1This - height
+                        val y2This = y1This - (pack?.h ?: 0) * drawScale
                         vert.putFloat(x1This.toFloat())
                             .putFloat(y1This.toFloat())
                             .putFloat(pack?.s0 ?: 0f)
@@ -179,7 +183,7 @@ class SDFFont(
                         indx.putShort((vertPos + 2).toShort())
                             .putShort((vertPos + 3).toShort())
                             .putShort((vertPos + 0).toShort())
-                        xPos += width
+                        xPos += advance.get(0) * scale * drawScale
                         vertPos += 4
                     }
 

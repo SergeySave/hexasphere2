@@ -1,16 +1,15 @@
 package com.sergeysav.hexasphere.client.screen
 
 import com.artemis.World
-import com.sergeysav.hexasphere.client.IOUtil
-import com.sergeysav.hexasphere.client.bgfx.Encoder
 import com.sergeysav.hexasphere.client.bgfx.Framebuffer
-import com.sergeysav.hexasphere.client.bgfx.OrthographicCamera
 import com.sergeysav.hexasphere.client.bgfx.PerspectiveCamera
 import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
 import com.sergeysav.hexasphere.client.bgfx.View
 import com.sergeysav.hexasphere.client.bgfx.ViewArray
 import com.sergeysav.hexasphere.client.bgfx.set
-import com.sergeysav.hexasphere.client.font.SDFFont
+import com.sergeysav.hexasphere.client.font.FontManager
+import com.sergeysav.hexasphere.client.font.HAlign
+import com.sergeysav.hexasphere.client.font.VAlign
 import com.sergeysav.hexasphere.client.game.skybox.SkyboxRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.HexasphereRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.feature.CityRenderSystem
@@ -37,15 +36,15 @@ import org.joml.Vector3f
 import org.joml.Vector4f
 import java.util.Random
 import kotlin.math.pow
+import kotlin.math.sin
 
 class HSScreen : Screen {
 
     private lateinit var world: World
     private lateinit var tileSystem: TileSystem
     private lateinit var tileTypeSystem: TileTypeSystem
-    private lateinit var font: SDFFont
+    private var fontManager: FontManager? = null
     private var camera: PerspectiveCamera? = null
-    private var fontCamera: OrthographicCamera? = null
     private var time: Double = 0.0
     private val inputManager = InputManager()
     private val vec2 = Vector2f()
@@ -61,7 +60,7 @@ class HSScreen : Screen {
     private val random = Random()
 
     override fun create() {
-        val hex = Hexasphere.withSubdivisionLevel(3)
+        val hex = Hexasphere.withSubdivisionLevel(5)
 
         world = Game.create {
             with(
@@ -82,9 +81,7 @@ class HSScreen : Screen {
             lookAt(vec3a.set(0f, 0f, 0f))
         }
 
-        font = SDFFont(IOUtil.loadResource("/font/OpenSans/OpenSans-Regular.ttf"), pixelHeight = 60f, bitmapSize = 512)
-
-        fontCamera = OrthographicCamera(0.0, 0.0,  0.0, 0.0, -1f, 1f)
+        fontManager = FontManager()
     }
 
     override fun resume() {
@@ -149,26 +146,15 @@ class HSScreen : Screen {
         world.delta = delta.toFloat()
         world.process()
 
-        fontCamera?.run {
-            this.width = width.toDouble()
-            this.height = height.toDouble()
-            update(uiView)
-        }
+//        Encoder.with {
+//            DebugRender.fillQuad(this, uiView, Vector3f(0f, 0f, 0f), Vector3f(width.toFloat(), 0f, 0f), Vector3f(width.toFloat(), height / 2f, 0f), Vector3f(0f, height / 2f, 0f), color(0xFF, 0x00, 0x00))
+//        }
 
-        Encoder.with {
-
-            val scale = 1 / (font.computeWidth("abcdefghijklmn opqrstuvwxyz") / (width - 100)).toFloat()
-            val w = font.computeWidth("abcdefghijklmn opqrstuvwxyz") * scale
-            val h = font.computeHeight("abcdefghijklmn opqrstuvwxyz") * scale
-            val x = (width - w) / 2.0
-            val y = (height - h) / 2.0
-            font.render(this, uiView, x, y, "abcdefghijklmn opqrstuvwxyz",
-                color = vec4.setColor(r=0xFF, g=0xFF, b=0xFF),
-                drawScale = scale,
-                extraThickness = 0f,
-                outlineColor = vec4b.setColor(r=0x00, g=0x00, b=0x00),
-                outlineThickness = 0f
-            )
+        fontManager?.render(width.toDouble(), height.toDouble(), uiView) { encoder, _ ->
+            color.setColor(0xFF, 0xFF, 0xFF)
+            outlineColor.setColor(0x00, 0x00, 0x00)
+            encoder.drawFont("Hello\nWorld!", width / 2.0, height / 2.0, uiView, sin(time * 0.4).pow(2).toFloat() * 5,
+                hAlign = HAlign.CENTER, vAlign = VAlign.CENTER, outlineThickness = 0.3f, multiline = true)
         }
 
         inputManager.update()
@@ -182,9 +168,7 @@ class HSScreen : Screen {
         camera?.dispose()
         camera = null
         world.dispose()
-        fontCamera?.dispose()
-        fontCamera = null
-        font.dispose()
+        fontManager?.dispose()
     }
 
     override fun onKey(action: Action, key: Key, keyModifiers: KeyModifiers) {
