@@ -24,9 +24,10 @@ class RenderDataSystem : NonProcessingSystem() {
         this.height = height
 
         View.touch() // Touch view 0 to make sure everything renders
-        skyboxView.set("Skybox", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT)
-        featuresView.set("Features", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT)
-        uiView.set("UI", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT)
+        hexasphereView.set("Hexasphere", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT, View.ViewMode.ASCENDING)
+        skyboxView.set("Skybox", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT, View.ViewMode.ASCENDING)
+        featuresView.set("Features", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT, View.ViewMode.ASCENDING)
+        uiView.set("UI", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT, View.ViewMode.SEQUENTIAL)
         View.setViewOrder(views)
     }
 }
