@@ -8,9 +8,9 @@ import com.sergeysav.hexasphere.client.assimp.AssimpModel
 import com.sergeysav.hexasphere.client.assimp.AssimpUtils
 import com.sergeysav.hexasphere.client.bgfx.Encoder
 import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
-import com.sergeysav.hexasphere.client.bgfx.View
 import com.sergeysav.hexasphere.client.bgfx.withInstanceBuffer
 import com.sergeysav.hexasphere.client.game.tile.TileFeaturePositionComponent
+import com.sergeysav.hexasphere.client.render.RenderDataSystem
 import com.sergeysav.hexasphere.common.game.tile.TileComponent
 import com.sergeysav.hexasphere.common.game.tile.feature.CityFeatureComponent
 import com.sergeysav.hexasphere.common.game.tile.feature.TileFeatureSystem
@@ -20,7 +20,7 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.system.MemoryStack
 
-class CityRenderSystem(private val view: View) : BaseEntitySystem(Aspect.all(TileFeaturePositionComponent::class.java, TileComponent::class.java, CityFeatureComponent::class.java)) {
+class CityRenderSystem : BaseEntitySystem(Aspect.all(TileFeaturePositionComponent::class.java, TileComponent::class.java, CityFeatureComponent::class.java)) {
 
     private val vec3a = Vector3f()
     private val vec3b = Vector3f()
@@ -29,6 +29,7 @@ class CityRenderSystem(private val view: View) : BaseEntitySystem(Aspect.all(Til
     private val rotation = Matrix4f()
     private val instanceStride = 64
 
+    private lateinit var renderDataSystem: RenderDataSystem
     private lateinit var featureSystem: TileFeatureSystem
     private lateinit var featMapper: ComponentMapper<TileFeaturePositionComponent>
     private lateinit var tileMapper: ComponentMapper<TileComponent>
@@ -86,7 +87,7 @@ class CityRenderSystem(private val view: View) : BaseEntitySystem(Aspect.all(Til
                         setTransform(model.identity().get(buffer))
                         setInstanceBuffer(instance, cities)
                         mesh.set(this)
-                        submit(shader, view.id)
+                        submit(shader, renderDataSystem.featuresView)
                     }
                 }
             }

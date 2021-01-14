@@ -7,12 +7,12 @@ import com.sergeysav.hexasphere.client.bgfx.Texture
 import com.sergeysav.hexasphere.client.bgfx.Uniform
 import com.sergeysav.hexasphere.client.bgfx.VertexAttribute
 import com.sergeysav.hexasphere.client.bgfx.VertexLayout
-import com.sergeysav.hexasphere.client.bgfx.View
 import com.sergeysav.hexasphere.client.mesh.StaticMesh
+import com.sergeysav.hexasphere.client.render.RenderDataSystem
 import org.joml.Matrix4f
 import org.lwjgl.system.MemoryUtil
 
-class SkyboxRenderSystem(fileName: String, private val view: View) : BaseSystem() {
+class SkyboxRenderSystem(fileName: String) : BaseSystem() {
 
     private var skyboxTexture: Texture = Texture.newCubeMap(fileName)
     private var texCubeSampler: Uniform = Uniform.new("s_texCube", Uniform.Type.SAMPLER)
@@ -45,12 +45,13 @@ class SkyboxRenderSystem(fileName: String, private val view: View) : BaseSystem(
         freeVertices = true, freeIndices = true
     )
     private val model = Matrix4f().scale(100_000f)
+    private lateinit var renderDataSystem: RenderDataSystem
 
     override fun processSystem() {
         Encoder.with { // This should be rendered last in the background
             setState(Encoder.SKYBOX)
             setTexture(0, texCubeSampler, skyboxTexture)
-            skyboxMesh.render(this, model, view.id)
+            skyboxMesh.render(this, model, renderDataSystem.skyboxView.id)
         }
     }
 

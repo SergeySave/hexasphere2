@@ -1,5 +1,5 @@
 
-ui.fps.format=FPS: %.0f
+ui.debug.fps.format=FPS: %.0f
 ui.selected_tile.format=Selected Tile: %s
 
 tile.none.name=None

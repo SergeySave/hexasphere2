@@ -18,7 +18,7 @@ object TileSelectionHelper {
         inner: (Int)->Unit
     ) {
         if (SphereRayIntersect.computeIntersection(viewDirection, viewPosition, Vectors.ZERO3f, 1.0, selectionComputeVector) != null) {
-            val bestTile = clientGameManager.tileSystem.getClosestTile(selectionComputeVector)
+            val bestTile = clientGameManager.tile.getClosestTile(selectionComputeVector)
             if (bestTile != -1) {
                 inner(bestTile)
             }
@@ -32,7 +32,7 @@ object TileSelectionHelper {
         inner: (Int)->Unit
     ) {
         if (SphereRayIntersect.computeIntersection(viewDirection, viewPosition, Vectors.ZERO3f, 1.0, selectionComputeVector) != null) {
-            val bestTile = clientGameManager.tileSystem.getClosestTile(selectionComputeVector)
+            val bestTile = clientGameManager.tile.getClosestTile(selectionComputeVector)
             inner(bestTile)
         } else {
             inner(-1)
@@ -40,9 +40,9 @@ object TileSelectionHelper {
     }
 
     inline fun <T> getSelectedTileType(clientGameManager: ClientGameManager, inner: (TileType?) -> T): T {
-        val selectedTile = clientGameManager.selectionSystem.selectedTile
+        val selectedTile = clientGameManager.selection.selectedTile
         return if (selectedTile != -1){
-            val type = clientGameManager.tileTypeSystem.getTileType(selectedTile)
+            val type = clientGameManager.tileType.getTileType(selectedTile)
             inner(type)
         } else {
             inner(null)

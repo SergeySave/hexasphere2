@@ -7,39 +7,32 @@ import com.sergeysav.hexasphere.client.bgfx.View
 import org.joml.Vector4f
 import org.joml.Vector4fc
 
-class FontManager {
+class FontManager : IFontManager {
 
-    val font = SDFFont(IOUtil.loadResource("/font/OpenSans/OpenSans-Regular.ttf"), pixelHeight = 60f, bitmapSize = 512)
+    override val font = SDFFont(IOUtil.loadResource("/font/OpenSans/OpenSans-Regular.ttf"), pixelHeight = 60f, bitmapSize = 512)
     private val camera = OrthographicCamera(0.0, 0.0,  0.0, 0.0, -1f, 1f)
-    val color = Vector4f(1f, 1f, 1f, 1f)
-    val outlineColor = Vector4f(1f, 1f, 1f, 1f)
+    override val color = Vector4f(1f, 1f, 1f, 1f)
+    override val outlineColor = Vector4f(1f, 1f, 1f, 1f)
 
-    fun updateCamera(width: Double, height: Double, view: View) {
+    override fun updateCamera(width: Double, height: Double, view: View) {
         camera.width = width
         camera.height = height
         camera.update(view)
     }
 
-    inline fun render(width: Double, height: Double, view: View, inner: FontManager.(Encoder, SDFFont)->Unit) {
-        updateCamera(width, height, view)
-        Encoder.with {
-            inner(this, font)
-        }
-    }
-
-    fun Encoder.drawFont(
+    override fun Encoder.drawFont(
         text: CharSequence,
         x: Double,
         y: Double,
         view: View,
         scale: Float,
-        color: Vector4fc = this@FontManager.color,
-        outlineColor: Vector4fc = this@FontManager.outlineColor,
-        hAlign: HAlign = HAlign.LEFT,
-        vAlign: VAlign = VAlign.CENTER,
-        thickness: Float = 0f,
-        outlineThickness: Float = 0f,
-        multiline: Boolean = false
+        color: Vector4fc,
+        outlineColor: Vector4fc,
+        hAlign: HAlign,
+        vAlign: VAlign,
+        thickness: Float,
+        outlineThickness: Float,
+        multiline: Boolean
     ) {
         if (!multiline) {
             val fixedX = when (hAlign) {
@@ -86,7 +79,7 @@ class FontManager {
         }
     }
 
-    fun dispose() {
+    override fun dispose() {
         font.dispose()
         camera.dispose()
     }

@@ -20,7 +20,8 @@ class SelectionSystem : BaseSystem() {
             }
         }
 
-    override fun processSystem() { }
+    override fun processSystem() {
+    }
 
     fun clearSelectedTile() {
         selectedTile = -1

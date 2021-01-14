@@ -10,8 +10,8 @@ import com.sergeysav.hexasphere.client.bgfx.StaticIndexBuffer
 import com.sergeysav.hexasphere.client.bgfx.VertexAttribute
 import com.sergeysav.hexasphere.client.bgfx.VertexLayout
 import com.sergeysav.hexasphere.client.bgfx.VertexLayoutHandle
-import com.sergeysav.hexasphere.client.bgfx.View
 import com.sergeysav.hexasphere.client.game.selection.SelectionSystem
+import com.sergeysav.hexasphere.client.render.RenderDataSystem
 import com.sergeysav.hexasphere.common.blueComponent
 import com.sergeysav.hexasphere.common.color
 import com.sergeysav.hexasphere.common.game.Groups
@@ -24,7 +24,6 @@ import org.lwjgl.system.MemoryUtil
 class HexasphereRenderSystem(
     private val pentagons: Int,
     private val hexagons: Int,
-    private val viewId: View,
     private val shader: ShaderProgram
 ) : BaseSystem() {
 
@@ -45,6 +44,7 @@ class HexasphereRenderSystem(
     private lateinit var groupManager: GroupManager
     private lateinit var tileTypeSystem: TileTypeSystem
     private lateinit var selectionSystem: SelectionSystem
+    private lateinit var renderDataSystem: RenderDataSystem
 
     override fun dispose() {
         super.dispose()
@@ -128,7 +128,7 @@ class HexasphereRenderSystem(
             setVertexBuffer(vertBuffer, vertLayoutHandle, verts)
             setIndexBuffer(indxBuffer!!, (pentagons * 3 + hexagons * 4) * 3)
             setTransform(model.get(modelBuffer))
-            submit(shader, viewId.id)
+            submit(shader, renderDataSystem.hexasphereView)
         }
     }
 }

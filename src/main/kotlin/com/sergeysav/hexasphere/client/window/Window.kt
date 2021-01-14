@@ -167,7 +167,7 @@ class Window(
                     toRenderScreen.resume()
                 }
                 lastRenderedScreen = toRenderScreen
-                when (val action = toRenderScreen.render(frameTime * toMs, width, height)) {
+                when (val action = toRenderScreen.render(frameTime * toMs / 1000.0, width, height)) {
                     ScreenAction.NoOp -> { }
                     ScreenAction.Pop -> popScreen()
                     is ScreenAction.Push -> pushScreen(action.newScreen)
