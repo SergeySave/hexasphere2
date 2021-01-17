@@ -1,9 +1,9 @@
 package com.sergeysav.hexasphere.client.assimp
 
 import com.sergeysav.hexasphere.client.IOUtil
-import com.sergeysav.hexasphere.client.bgfx.VertexAttribute
-import com.sergeysav.hexasphere.client.bgfx.VertexLayout
-import com.sergeysav.hexasphere.client.bgfx.VertexLayoutHandle
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexAttribute
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayout
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayoutHandle
 import com.sergeysav.hexasphere.client.stb.Image
 import com.sergeysav.hexasphere.client.stb.createTexture
 import com.sergeysav.hexasphere.common.fixPath

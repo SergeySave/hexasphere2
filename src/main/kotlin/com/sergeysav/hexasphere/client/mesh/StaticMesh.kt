@@ -1,11 +1,11 @@
 package com.sergeysav.hexasphere.client.mesh
 
-import com.sergeysav.hexasphere.client.bgfx.Encoder
-import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
-import com.sergeysav.hexasphere.client.bgfx.StaticIndexBuffer
-import com.sergeysav.hexasphere.client.bgfx.StaticVertexBuffer
-import com.sergeysav.hexasphere.client.bgfx.VertexLayout
-import com.sergeysav.hexasphere.client.bgfx.VertexLayoutHandle
+import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
+import com.sergeysav.hexasphere.client.bgfx.index.StaticIndexBuffer
+import com.sergeysav.hexasphere.client.bgfx.shader.ShaderProgram
+import com.sergeysav.hexasphere.client.bgfx.vertex.StaticVertexBuffer
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayout
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayoutHandle
 import org.joml.Matrix4fc
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer

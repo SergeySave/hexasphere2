@@ -2,7 +2,7 @@ package com.sergeysav.hexasphere.client.stb
 
 import com.sergeysav.hexasphere.client.IOUtil
 import com.sergeysav.hexasphere.client.bgfx.BGFXUtil
-import com.sergeysav.hexasphere.client.bgfx.Texture
+import com.sergeysav.hexasphere.client.bgfx.texture.Texture
 import mu.KotlinLogging
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.stb.STBImage

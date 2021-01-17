@@ -1,11 +1,11 @@
 package com.sergeysav.hexasphere.client
 
 import com.sergeysav.hexasphere.client.bgfx.BGFXUtil
-import com.sergeysav.hexasphere.client.bgfx.Encoder
-import com.sergeysav.hexasphere.client.bgfx.VertexAttribute
-import com.sergeysav.hexasphere.client.bgfx.VertexLayout
-import com.sergeysav.hexasphere.client.bgfx.VertexLayoutHandle
-import com.sergeysav.hexasphere.client.bgfx.withTransientVertexBuffer
+import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexAttribute
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayout
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayoutHandle
+import com.sergeysav.hexasphere.client.bgfx.vertex.withTransientVertexBuffer
 import org.lwjgl.system.MemoryStack
 
 object ScreenSpaceQuad {

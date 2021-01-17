@@ -5,10 +5,10 @@ import com.artemis.BaseEntitySystem
 import com.artemis.ComponentMapper
 import com.sergeysav.hexasphere.client.assimp.AssimpModel
 import com.sergeysav.hexasphere.client.assimp.AssimpUtils
-import com.sergeysav.hexasphere.client.bgfx.Encoder
-import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
-import com.sergeysav.hexasphere.client.bgfx.View
-import com.sergeysav.hexasphere.client.bgfx.withInstanceBuffer
+import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
+import com.sergeysav.hexasphere.client.bgfx.instance.withInstanceBuffer
+import com.sergeysav.hexasphere.client.bgfx.shader.ShaderProgram
+import com.sergeysav.hexasphere.client.bgfx.view.View
 import com.sergeysav.hexasphere.common.game.tile.TileComponent
 import com.sergeysav.hexasphere.common.hexasphere.computeTileRotation
 import org.joml.Matrix3f

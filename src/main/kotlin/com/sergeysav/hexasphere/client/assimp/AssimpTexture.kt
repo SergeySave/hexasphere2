@@ -1,7 +1,7 @@
 package com.sergeysav.hexasphere.client.assimp
 
-import com.sergeysav.hexasphere.client.bgfx.Texture
-import com.sergeysav.hexasphere.client.bgfx.Uniform
+import com.sergeysav.hexasphere.client.bgfx.texture.Texture
+import com.sergeysav.hexasphere.client.bgfx.uniform.Uniform
 import org.lwjgl.assimp.Assimp
 
 /**

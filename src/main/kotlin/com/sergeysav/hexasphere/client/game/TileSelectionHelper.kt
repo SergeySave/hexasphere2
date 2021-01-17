@@ -1,6 +1,5 @@
 package com.sergeysav.hexasphere.client.game
 
-import com.sergeysav.hexasphere.client.math.SphereRayIntersect
 import com.sergeysav.hexasphere.common.Vectors
 import com.sergeysav.hexasphere.common.game.tile.type.TileType
 import org.joml.Vector3f

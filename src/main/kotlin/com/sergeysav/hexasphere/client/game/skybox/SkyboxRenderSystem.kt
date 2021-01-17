@@ -1,14 +1,14 @@
 package com.sergeysav.hexasphere.client.game.skybox
 
 import com.artemis.BaseSystem
-import com.sergeysav.hexasphere.client.bgfx.Encoder
-import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
-import com.sergeysav.hexasphere.client.bgfx.Texture
-import com.sergeysav.hexasphere.client.bgfx.Uniform
-import com.sergeysav.hexasphere.client.bgfx.VertexAttribute
-import com.sergeysav.hexasphere.client.bgfx.VertexLayout
+import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
+import com.sergeysav.hexasphere.client.bgfx.shader.ShaderProgram
+import com.sergeysav.hexasphere.client.bgfx.texture.Texture
+import com.sergeysav.hexasphere.client.bgfx.uniform.Uniform
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexAttribute
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayout
 import com.sergeysav.hexasphere.client.mesh.StaticMesh
-import com.sergeysav.hexasphere.client.render.RenderDataSystem
+import com.sergeysav.hexasphere.client.game.render.RenderDataSystem
 import org.joml.Matrix4f
 import org.lwjgl.system.MemoryUtil
 

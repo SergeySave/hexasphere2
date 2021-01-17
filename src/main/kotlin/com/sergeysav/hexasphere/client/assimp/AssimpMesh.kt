@@ -1,8 +1,8 @@
 package com.sergeysav.hexasphere.client.assimp
 
-import com.sergeysav.hexasphere.client.bgfx.Encoder
-import com.sergeysav.hexasphere.client.bgfx.StaticIndexBuffer
-import com.sergeysav.hexasphere.client.bgfx.StaticVertexBuffer
+import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
+import com.sergeysav.hexasphere.client.bgfx.index.StaticIndexBuffer
+import com.sergeysav.hexasphere.client.bgfx.vertex.StaticVertexBuffer
 import java.nio.ByteBuffer
 
 class AssimpMesh(vertexData: ByteBuffer, private val numVerts: Int, indexData: ByteBuffer, private val numIndx: Int, private val textures: List<AssimpTexture>) {

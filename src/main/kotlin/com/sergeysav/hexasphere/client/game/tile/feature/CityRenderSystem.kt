@@ -6,11 +6,11 @@ import com.artemis.ComponentMapper
 import com.artemis.utils.IntBag
 import com.sergeysav.hexasphere.client.assimp.AssimpModel
 import com.sergeysav.hexasphere.client.assimp.AssimpUtils
-import com.sergeysav.hexasphere.client.bgfx.Encoder
-import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
-import com.sergeysav.hexasphere.client.bgfx.withInstanceBuffer
+import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
+import com.sergeysav.hexasphere.client.bgfx.shader.ShaderProgram
+import com.sergeysav.hexasphere.client.bgfx.instance.withInstanceBuffer
 import com.sergeysav.hexasphere.client.game.tile.TileFeaturePositionComponent
-import com.sergeysav.hexasphere.client.render.RenderDataSystem
+import com.sergeysav.hexasphere.client.game.render.RenderDataSystem
 import com.sergeysav.hexasphere.common.game.tile.TileComponent
 import com.sergeysav.hexasphere.common.game.tile.feature.CityFeatureComponent
 import com.sergeysav.hexasphere.common.game.tile.feature.TileFeatureSystem

@@ -1,11 +1,12 @@
 package com.sergeysav.hexasphere.client.screen
 
-import com.sergeysav.hexasphere.client.bgfx.PerspectiveCamera
-import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
+import com.sergeysav.hexasphere.client.bgfx.camera.PerspectiveCamera
+import com.sergeysav.hexasphere.client.bgfx.shader.ShaderProgram
 import com.sergeysav.hexasphere.client.game.ClientGameManager
 import com.sergeysav.hexasphere.client.game.TileSelectionHelper
 import com.sergeysav.hexasphere.client.game.skybox.SkyboxRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.HexasphereRenderSystem
+import com.sergeysav.hexasphere.client.game.ui.DebugUIRenderSystem
 import com.sergeysav.hexasphere.client.hexasphere.clientAddToWorld
 import com.sergeysav.hexasphere.client.input.Action
 import com.sergeysav.hexasphere.client.input.Key
@@ -14,6 +15,7 @@ import com.sergeysav.hexasphere.client.input.MouseButton
 import com.sergeysav.hexasphere.client.localization.L10n
 import com.sergeysav.hexasphere.client.window.screen.Screen
 import com.sergeysav.hexasphere.client.window.screen.ScreenAction
+import com.sergeysav.hexasphere.common.ecs.flipEnabled
 import com.sergeysav.hexasphere.common.game.tile.type.CoastTileTypeComponent
 import com.sergeysav.hexasphere.common.game.tile.type.setType
 import com.sergeysav.hexasphere.common.hexasphere.Hexasphere
@@ -39,7 +41,7 @@ class HSScreen : Screen {
             with(
                 HexasphereRenderSystem(
                     hex.pentagons, hex.hexagons,
-                    ShaderProgram.loadFromFiles("cube/vs_cubes", "cube/fs_cubes")
+                    ShaderProgram.loadFromFiles("hexasphere/vs_default", "hexasphere/fs_default")
                 )
             )
             with(SkyboxRenderSystem("/skybox/nasa2k.ktx"))
@@ -109,6 +111,10 @@ class HSScreen : Screen {
             TileSelectionHelper.selectBestTileOrNone(clientGameManager, viewDirection, camera!!.position) { bestTile ->
                 clientGameManager.selection.selectedTile = bestTile
             }
+        }
+
+        if (clientGameManager.inputManager.isKeyJustUp(Key.F3)) {
+            clientGameManager.world.getSystem(DebugUIRenderSystem::class.java).flipEnabled()
         }
 
         clientGameManager.process(delta, width.toDouble(), height.toDouble())

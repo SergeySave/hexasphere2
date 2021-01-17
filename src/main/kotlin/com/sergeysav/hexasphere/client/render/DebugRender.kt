@@ -1,12 +1,12 @@
 package com.sergeysav.hexasphere.client.render
 
-import com.sergeysav.hexasphere.client.bgfx.Encoder
-import com.sergeysav.hexasphere.client.bgfx.ShaderProgram
-import com.sergeysav.hexasphere.client.bgfx.VertexAttribute
-import com.sergeysav.hexasphere.client.bgfx.VertexLayout
-import com.sergeysav.hexasphere.client.bgfx.VertexLayoutHandle
-import com.sergeysav.hexasphere.client.bgfx.View
-import com.sergeysav.hexasphere.client.bgfx.withTransientVertexBuffer
+import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
+import com.sergeysav.hexasphere.client.bgfx.shader.ShaderProgram
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexAttribute
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayout
+import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayoutHandle
+import com.sergeysav.hexasphere.client.bgfx.vertex.withTransientVertexBuffer
+import com.sergeysav.hexasphere.client.bgfx.view.View
 import org.joml.Vector3fc
 import org.lwjgl.system.MemoryStack
 
