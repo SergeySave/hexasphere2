@@ -47,5 +47,7 @@ object IOUtil {
         true
     } catch (e: IllegalStateException) {
         false
+    } catch (e: NullPointerException) {
+        false
     }
 }

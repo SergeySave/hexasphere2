@@ -34,9 +34,9 @@ data class WindowOptions(
                 renderer = BGFX.BGFX_RENDERER_TYPE_NOOP
             } else if (Platform.get() == Platform.WINDOWS) {
                 when {
-                    args.contains("--d3d9") -> renderer = BGFX.BGFX_RENDERER_TYPE_DIRECT3D9
-                    args.contains("--d3d11") -> renderer = BGFX.BGFX_RENDERER_TYPE_DIRECT3D11
-                    args.contains("--d3d12") -> renderer = BGFX.BGFX_RENDERER_TYPE_DIRECT3D12
+                    args.contains("--d9") -> renderer = BGFX.BGFX_RENDERER_TYPE_DIRECT3D9
+                    args.contains("--d11") -> renderer = BGFX.BGFX_RENDERER_TYPE_DIRECT3D11
+                    args.contains("--d12") -> renderer = BGFX.BGFX_RENDERER_TYPE_DIRECT3D12
                 }
             } else if (Platform.get() == Platform.MACOSX) {
                 if (args.contains("--mtl")) {

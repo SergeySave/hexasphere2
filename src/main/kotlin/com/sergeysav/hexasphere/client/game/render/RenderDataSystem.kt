@@ -1,12 +1,22 @@
 package com.sergeysav.hexasphere.client.game.render
 
+import com.artemis.BaseSystem
 import com.sergeysav.hexasphere.client.bgfx.frame.Framebuffer
+import com.sergeysav.hexasphere.client.bgfx.shader.ShaderProgram
 import com.sergeysav.hexasphere.client.bgfx.view.View
 import com.sergeysav.hexasphere.client.bgfx.view.ViewArray
 import com.sergeysav.hexasphere.client.bgfx.view.set
-import com.sergeysav.hexasphere.common.ecs.NonProcessingSystem
+import com.sergeysav.hexasphere.client.game.input.InputManagerSystem
+import com.sergeysav.hexasphere.client.settings.SettingsSystem
 
-class RenderDataSystem : NonProcessingSystem() {
+class RenderDataSystem : BaseSystem() {
+
+    private lateinit var inputManager: InputManagerSystem
+    private lateinit var settingsSystem: SettingsSystem
+    private val hexDefaultShader = ShaderProgram.loadFromFiles("hexasphere/vs_default", "hexasphere/fs_default")
+    private val hexStereoShader = ShaderProgram.loadFromFiles("hexasphere/vs_stereographic", "hexasphere/fs_default")
+    private val featDefaultShader = ShaderProgram.loadFromFiles("feature/vs_default", "feature/fs_default")
+    private val featStereoShader = ShaderProgram.loadFromFiles("feature/vs_stereographic", "feature/fs_default")
 
     val hexasphereView = View(0)
     val skyboxView = View(1)
@@ -17,6 +27,12 @@ class RenderDataSystem : NonProcessingSystem() {
     var width: Double = 0.0
         private set
     var height: Double = 0.0
+        private set
+    var hexasphereShader = hexDefaultShader
+        private set
+    var featureShader = featDefaultShader
+        private set
+    var mode = RenderMode.DEFAULT
         private set
 
     fun initializeFrame(width: Double, height: Double) {
@@ -29,5 +45,34 @@ class RenderDataSystem : NonProcessingSystem() {
         featuresView.set("Features", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT, View.ViewMode.ASCENDING)
         uiView.set("UI", View.BackbufferRatio.EQUAL, Framebuffer.DEFAULT, View.ViewMode.SEQUENTIAL)
         View.setViewOrder(views)
+    }
+
+    override fun processSystem() {
+        if (inputManager.isKeyJustUp(settingsSystem.uiSettings.switchRenderModeKey)) {
+            mode = RenderMode.VALUES[(mode.ordinal + 1) % RenderMode.VALUES.size]
+            if (mode == RenderMode.DEFAULT) {
+                hexasphereShader = hexDefaultShader
+                featureShader = featDefaultShader
+            } else {
+                hexasphereShader = hexStereoShader
+                featureShader = featStereoShader
+            }
+        }
+    }
+
+    override fun dispose() {
+        hexDefaultShader.dispose()
+        hexStereoShader.dispose()
+        featDefaultShader.dispose()
+        featStereoShader.dispose()
+    }
+
+    enum class RenderMode {
+        DEFAULT,
+        STEREOGRAPHIC;
+
+        companion object {
+            val VALUES = values().toList()
+        }
     }
 }

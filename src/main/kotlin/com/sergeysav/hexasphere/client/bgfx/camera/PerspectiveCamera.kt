@@ -44,8 +44,9 @@ class PerspectiveCamera(
     fun setFovRad(radians: Float) {
         fovy = radians
     }
-    fun setAspect(width: Int, height: Int) {
-        aspect = width.toFloat() / height
+    fun setAspect(width: Int, height: Int) = setAspect(width.toFloat(), height.toFloat())
+    fun setAspect(width: Float, height: Float) {
+        aspect = width / height
     }
 
     // Camera Location

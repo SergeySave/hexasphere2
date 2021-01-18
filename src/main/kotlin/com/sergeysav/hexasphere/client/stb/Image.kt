@@ -51,5 +51,6 @@ fun Image.Companion.createTexture(resourceName: String, flipY: Boolean = true): 
 
     val bgfxMemory = BGFX.bgfx_make_ref_release(image.data, BGFXUtil.stbImageReleaseMemoryCb, MemoryUtil.NULL)
 
-    return Texture(BGFX.bgfx_create_texture_2d(image.width, image.height, false, image.channels, format, BGFX.BGFX_TEXTURE_NONE, bgfxMemory))
+    val flags = BGFX.BGFX_TEXTURE_NONE
+    return Texture(BGFX.bgfx_create_texture_2d(image.width, image.height, false, 1, format, flags, bgfxMemory))
 }

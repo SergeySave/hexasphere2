@@ -28,5 +28,9 @@ class TileSystem : BaseEntitySystem(Aspect.all(TileComponent::class.java)) {
         return minTile
     }
 
-    override fun processSystem() { isEnabled = false }
+    override fun begin() {
+        isEnabled = false
+    }
+
+    override fun processSystem() {}
 }

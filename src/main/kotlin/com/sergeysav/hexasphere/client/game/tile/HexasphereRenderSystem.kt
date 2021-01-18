@@ -3,15 +3,14 @@ package com.sergeysav.hexasphere.client.game.tile
 import com.artemis.BaseSystem
 import com.artemis.ComponentMapper
 import com.artemis.managers.GroupManager
-import com.sergeysav.hexasphere.client.bgfx.vertex.DynamicVertexBuffer
 import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
-import com.sergeysav.hexasphere.client.bgfx.shader.ShaderProgram
 import com.sergeysav.hexasphere.client.bgfx.index.StaticIndexBuffer
+import com.sergeysav.hexasphere.client.bgfx.vertex.DynamicVertexBuffer
 import com.sergeysav.hexasphere.client.bgfx.vertex.VertexAttribute
 import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayout
 import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayoutHandle
-import com.sergeysav.hexasphere.client.game.selection.SelectionSystem
 import com.sergeysav.hexasphere.client.game.render.RenderDataSystem
+import com.sergeysav.hexasphere.client.game.selection.SelectionSystem
 import com.sergeysav.hexasphere.common.blueComponent
 import com.sergeysav.hexasphere.common.color
 import com.sergeysav.hexasphere.common.game.Groups
@@ -23,8 +22,7 @@ import org.lwjgl.system.MemoryUtil
 
 class HexasphereRenderSystem(
     private val pentagons: Int,
-    private val hexagons: Int,
-    private val shader: ShaderProgram
+    private val hexagons: Int
 ) : BaseSystem() {
 
     private val vertLayout = VertexLayout.new(
@@ -128,7 +126,7 @@ class HexasphereRenderSystem(
             setVertexBuffer(vertBuffer, vertLayoutHandle, verts)
             setIndexBuffer(indxBuffer!!, (pentagons * 3 + hexagons * 4) * 3)
             setTransform(model.get(modelBuffer))
-            submit(shader, renderDataSystem.hexasphereView)
+            submit(renderDataSystem.hexasphereShader, renderDataSystem.hexasphereView)
         }
     }
 }

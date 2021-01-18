@@ -4,4 +4,10 @@
 
 #include <bgfx_shader.shaderh>
 
+#if BGFX_SHADER_LANGUAGE_GLSL
+#define mtxGetCol4(_0)              _0[3]
+#else
+#define mtxGetCol4(_0)              transpose(_0)[3]
+#endif // BGFX_SHADER_LANGUAGE_GLSL
+
 #endif // HEXASPHERE_COMMON_SHADER_H

@@ -120,8 +120,11 @@ class Window(
 
             logger.trace { "Applying renderer settings" }
             BGFXUtil.zZeroToOne = !bgfxCaps.homogeneousDepth()
+            logger.trace { "Homogenous Depth: ${bgfxCaps.homogeneousDepth()}" }
             BGFXUtil.texelHalf = if (this.renderer == BGFX.BGFX_RENDERER_TYPE_DIRECT3D9) 0.5f else 0f
             BGFXUtil.reset = reset
+
+            logger.info { "Texture Read Back Capability: ${if ((bgfxCaps.supported() and BGFX.BGFX_CAPS_TEXTURE_READ_BACK) != 0L) true else false}" }
 
             logger.trace { "Settings debug mode" }
             BGFX.bgfx_set_debug(windowOptions.debug ?: WindowOptions.DEFAULT_DEBUG)

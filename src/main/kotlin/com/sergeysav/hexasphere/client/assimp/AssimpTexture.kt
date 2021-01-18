@@ -15,15 +15,15 @@ data class AssimpTexture(val texture: Texture, val path: String, val type: Type)
         AssimpUtils.disposeTexture(this)
     }
 
-    enum class Type(val typeName: String, val assimpType: Int) {
-        DIFFUSE("texture_diffuse", Assimp.aiTextureType_DIFFUSE),
-        SPECULAR("texture_specular", Assimp.aiTextureType_SPECULAR),
-        NORMAL("texture_normal", Assimp.aiTextureType_HEIGHT)
+    enum class Type(val assimpType: Int) {
+        DIFFUSE(Assimp.aiTextureType_DIFFUSE),
+        SPECULAR(Assimp.aiTextureType_SPECULAR),
+        NORMAL(Assimp.aiTextureType_HEIGHT)
     }
 
     companion object {
-        val diffuseUniforms = Array(4) { Uniform.new("s_diffuse${it + 1}", Uniform.Type.SAMPLER) }
-        val specularUniforms = Array(4) { Uniform.new("s_specular${it + 1}", Uniform.Type.SAMPLER) }
-        val normalUniforms = Array(4) { Uniform.new("s_normal${it + 1}", Uniform.Type.SAMPLER) }
+        val diffuseUniforms = Array(4) { Uniform.new("s_diffuse${it}", Uniform.Type.SAMPLER) }
+        val specularUniforms = Array(4) { Uniform.new("s_specular${it}", Uniform.Type.SAMPLER) }
+        val normalUniforms = Array(4) { Uniform.new("s_normal${it}", Uniform.Type.SAMPLER) }
     }
 }

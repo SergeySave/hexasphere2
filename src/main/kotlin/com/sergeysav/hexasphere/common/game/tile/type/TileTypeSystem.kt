@@ -1,15 +1,15 @@
 package com.sergeysav.hexasphere.common.game.tile.type
 
-import com.artemis.BaseSystem
 import com.artemis.Component
 import com.artemis.ComponentMapper
 import com.artemis.EntityTransmuter
 import com.artemis.EntityTransmuterFactory
 import com.artemis.managers.GroupManager
 import com.artemis.utils.Bag
+import com.sergeysav.hexasphere.common.ecs.NonProcessingSystem
 import com.sergeysav.hexasphere.common.game.Groups
 
-class TileTypeSystem : BaseSystem() {
+class TileTypeSystem : NonProcessingSystem() {
 
     private lateinit var groupManager: GroupManager
     private lateinit var mappers: Bag<ComponentMapper<out Component>>
@@ -59,10 +59,6 @@ class TileTypeSystem : BaseSystem() {
     fun setTileType(tileEntity: Int, type: Class<out Component>) {
         transmuters[type]?.transmute(tileEntity)
         groupManager.add(tileEntity, Groups.DIRTY_TILE)
-    }
-
-    override fun processSystem() {
-        isEnabled = false
     }
 }
 
