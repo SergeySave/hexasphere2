@@ -107,6 +107,13 @@ class SelectionSystem : BaseSystem() {
     override fun processSystem() {
         mouseoverTileDirty = true
 
+        if (mouseoverTileValue != -1) {
+            groupManager.add(mouseoverTileValue, Groups.DIRTY_TILE)
+        }
+        if (mouseoverTile != -1) {
+            groupManager.add(mouseoverTile, Groups.DIRTY_TILE)
+        }
+
         if (inputManager.isMouseButtonJustUp(settingsSystem.uiSettings.selectTileMouseButton) &&
             inputManager.getMouseButtonDownTime(settingsSystem.uiSettings.selectTileMouseButton) < settingsSystem.uiSettings.mouseHoldCutoffTime) {
             selectedTile = mouseoverTile
