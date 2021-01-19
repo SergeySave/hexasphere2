@@ -9,6 +9,7 @@ import com.sergeysav.hexasphere.client.game.render.RenderDataSystem
 import com.sergeysav.hexasphere.client.game.selection.SelectionSystem
 import com.sergeysav.hexasphere.client.game.tile.feature.CityRenderSystem
 import com.sergeysav.hexasphere.client.game.ui.DebugUIRenderSystem
+import com.sergeysav.hexasphere.client.game.ui.MinimapUIRenderSystem
 import com.sergeysav.hexasphere.client.settings.SettingsSystem
 import com.sergeysav.hexasphere.common.ecs.SystemPriority
 import com.sergeysav.hexasphere.common.game.Game
@@ -20,12 +21,13 @@ class ClientGameManager(renderSystemInit: WorldConfigurationBuilder.()->Unit) {
     val world: World = Game.create {
         renderSystemInit()
         with(SystemPriority.SETUP, CameraSystem())
+        with(SystemPriority.SETUP, FontManagerSystem())
         with(SystemPriority.INPUTS + 1, RenderDataSystem())
         with(SystemPriority.INPUTS, SelectionSystem())
         with(SystemPriority.NON_PROCESSING, SettingsSystem())
-        with(SystemPriority.NON_PROCESSING, FontManagerSystem())
         with(SystemPriority.RENDER, CityRenderSystem())
         with(SystemPriority.UI, DebugUIRenderSystem())
+        with(SystemPriority.UI, MinimapUIRenderSystem())
         with(SystemPriority.CLEANUP, InputManagerSystem())
     }
     val tile = world.getSystem(TileSystem::class.java)!!

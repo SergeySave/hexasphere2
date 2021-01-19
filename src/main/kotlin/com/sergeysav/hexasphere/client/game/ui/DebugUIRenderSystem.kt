@@ -26,7 +26,7 @@ class DebugUIRenderSystem : BaseSystem() {
         if (!settingsSystem.uiSettings.showDebugInfo) return
 
         val fps = fpsSmoothing.average()
-        fontManagerSystem.render(renderDataSystem.width, renderDataSystem.height, renderDataSystem.uiView) { encoder, _ ->
+        fontManagerSystem.render { encoder, _ ->
             val fontScale = (0.3 * settingsSystem.uiSettings.uiScale).toFloat()
 
             encoder.drawFont(

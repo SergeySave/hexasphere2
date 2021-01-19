@@ -36,3 +36,9 @@ inline fun FontManager.render(width: Double, height: Double, view: View, inner: 
         inner(this, font)
     }
 }
+
+inline fun FontManager.render(inner: FontManager.(Encoder, SDFFont)->Unit) {
+    Encoder.with {
+        inner(this, font)
+    }
+}
