@@ -54,11 +54,11 @@ inline class Encoder(val handle: Long) {
         BGFX.bgfx_encoder_set_state(handle, state, rgba)
     }
 
-    fun setTexture(textureUnit: Int, sampler: Uniform, texture: Texture, flags: Int = Int.MIN_VALUE) {
+    fun setTexture(textureUnit: Int, sampler: Uniform, texture: Texture, flags: Int = -1) {
         BGFX.bgfx_encoder_set_texture(handle, textureUnit, sampler.handle, texture.handle, flags)
     }
 
-    fun setUniform(uniform: Uniform, buffer: FloatBuffer, count: Int = -1) {
+    fun setUniform(uniform: Uniform, buffer: FloatBuffer, count: Int = 1) {
         BGFX.bgfx_encoder_set_uniform(handle, uniform.handle, buffer, count)
     }
 

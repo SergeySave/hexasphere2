@@ -12,7 +12,7 @@ import org.lwjgl.system.MemoryStack
 
 object DebugRender {
 
-    private val shader = ShaderProgram.loadFromFiles("/debug/vs", "/debug/fs")
+    private val shader = ShaderProgram.loadFromFiles("debug/vs", "debug/fs")
     private val vertexLayout: VertexLayout =
         VertexLayout.new(
             VertexAttribute(VertexAttribute.Attribute.POSITION, 3, VertexAttribute.Type.FLOAT),

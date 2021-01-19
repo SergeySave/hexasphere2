@@ -48,7 +48,7 @@ class HexasphereRenderSystem(
     private val model = Matrix4f()
     private val vec3a = Vector3d()
     private val vec4a = Vector4f()
-    private val outlineSettingsUniform = Uniform.new("u_outlineSettings", Uniform.Type.VEC4, 1)
+    private val outlineSettingsUniform = Uniform.new("u_outlineSettings", Uniform.Type.VEC4)
 
     private lateinit var geomMapper: ComponentMapper<TileGeometryComponent>
     private lateinit var groupManager: GroupManager
@@ -58,11 +58,14 @@ class HexasphereRenderSystem(
 
     override fun dispose() {
         super.dispose()
-        vertLayoutHandle.dispose()
         vertLayout.dispose()
-        indxBuffer?.dispose()
+        vertLayoutHandle.dispose()
         MemoryUtil.memFree(hexVerts)
+        vertBuffer.dispose()
+        indxBuffer?.dispose()
         MemoryUtil.memFree(modelBuffer)
+        MemoryUtil.memFree(vec4Buffer)
+        outlineSettingsUniform.dispose()
     }
 
     private fun setTileVerts(geometry: TileGeometryComponent, color: Int, outlineColor: Int): Int {
@@ -162,7 +165,7 @@ class HexasphereRenderSystem(
             setVertexBuffer(vertBuffer, vertLayoutHandle, verts)
             setIndexBuffer(indxBuffer!!, (pentagons * 5 + hexagons * 6) * 3)
             setTransform(model.get(modelBuffer))
-            setUniform(outlineSettingsUniform, vec4a.set(0.0f, 0.0f, 0f, 0f).get(vec4Buffer))
+            setUniform(outlineSettingsUniform, vec4a.set(0.00f, 0.0f, 0f, 0f).get(vec4Buffer))
             submit(renderDataSystem.hexasphereShader, renderDataSystem.hexasphereView)
         }
     }

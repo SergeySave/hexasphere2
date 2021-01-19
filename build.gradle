@@ -52,14 +52,14 @@ dependencies {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = '14'
+    kotlinOptions.jvmTarget = "1.8"
     kotlinOptions {
         freeCompilerArgs = ["-Xinline-classes"]
     }
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = '14'
+    kotlinOptions.jvmTarget = "1.8"
     kotlinOptions {
         freeCompilerArgs = ["-Xinline-classes"]
     }
@@ -76,6 +76,7 @@ application {
 }
 
 apply plugin: BGFXShaderCPlugin
+apply plugin: 'kotlin'
 
 bgfxShaderC {
     nacl = false
@@ -129,7 +130,7 @@ class BGFXShaderCPlugin implements Plugin<Project> {
                 toolsDir = "linux"
                 break
             case OperatingSystem.MAC_OS:
-                toolsDir = "macos"
+                toolsDir = "macosx"
                 break
         }
 

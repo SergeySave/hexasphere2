@@ -30,10 +30,7 @@ class ClientGameManager(renderSystemInit: WorldConfigurationBuilder.()->Unit) {
         with(SystemPriority.UI, MinimapUIRenderSystem())
         with(SystemPriority.CLEANUP, InputManagerSystem())
     }
-    val tile = world.getSystem(TileSystem::class.java)!!
-    val tileType = world.getSystem(TileTypeSystem::class.java)!!
-    val selection = world.getSystem(SelectionSystem::class.java)!!
-    val renderData = world.getSystem(RenderDataSystem::class.java)!!
+    private val renderData = world.getSystem(RenderDataSystem::class.java)!!
     val inputManager = world.getSystem(InputManagerSystem::class.java)!!
 
     init {
@@ -45,9 +42,6 @@ class ClientGameManager(renderSystemInit: WorldConfigurationBuilder.()->Unit) {
 
         world.delta = delta.toFloat()
         world.process()
-
-        // Update should happen after everything else updates
-//        inputManager.update(delta)
     }
 
     fun dispose() {

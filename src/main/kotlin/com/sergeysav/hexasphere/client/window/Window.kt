@@ -7,6 +7,7 @@ import com.sergeysav.hexasphere.client.input.KeyModifiers
 import com.sergeysav.hexasphere.client.input.MouseButton
 import com.sergeysav.hexasphere.client.window.screen.Screen
 import com.sergeysav.hexasphere.client.window.screen.ScreenAction
+import com.sergeysav.hexasphere.common.color
 import mu.KotlinLogging
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.bgfx.BGFXInit
@@ -43,6 +44,8 @@ class Window(
     private val screenStack = ArrayList<Screen>(16)
     private var lastRenderedScreen: Screen? = null
     private val modifiers = KeyModifiers.Mutable()
+    private var fbWidth: Int = width
+    private var fbHeight: Int = height
 
     private fun initAndRun() {
         MemoryStack.stackPush().use { stack ->
@@ -58,8 +61,20 @@ class Window(
             window = GLFW.glfwCreateWindow(width, height, title, MemoryUtil.NULL, MemoryUtil.NULL)
             if (window == 0L) throw WindowException("Failed to create GLFW window")
 
+            MemoryStack.stackPush().use { s2 ->
+                val w = s2.mallocInt(1)
+                val h = s2.mallocInt(1)
+                GLFW.glfwGetWindowSize(window, w, h)
+                width = w[0]
+                height = h[0]
+                GLFW.glfwGetFramebufferSize(window, w, h)
+                fbWidth = w[0]
+                fbHeight = h[0]
+            }
+
             logger.trace { "Setting GLFW Callbacks" }
-            GLFW.glfwSetFramebufferSizeCallback(window, this::onResize)
+            GLFW.glfwSetFramebufferSizeCallback(window, this::onFBResize)
+            GLFW.glfwSetWindowSizeCallback(window, this::onResize)
             GLFW.glfwSetKeyCallback(window, this::onKey)
             GLFW.glfwSetMouseButtonCallback(window, this::onMouseButton)
             GLFW.glfwSetCursorPosCallback(window, this::onMouseMove)
@@ -124,16 +139,16 @@ class Window(
             BGFXUtil.texelHalf = if (this.renderer == BGFX.BGFX_RENDERER_TYPE_DIRECT3D9) 0.5f else 0f
             BGFXUtil.reset = reset
 
-            logger.info { "Texture Read Back Capability: ${if ((bgfxCaps.supported() and BGFX.BGFX_CAPS_TEXTURE_READ_BACK) != 0L) true else false}" }
+            logger.info { "32 bit index buffer: ${(bgfxCaps.supported() and BGFX.BGFX_CAPS_INDEX32) != 0L}" }
 
-            logger.trace { "Settings debug mode" }
+            logger.trace { "Setting debug mode" }
             BGFX.bgfx_set_debug(windowOptions.debug ?: WindowOptions.DEFAULT_DEBUG)
 
-            logger.trace { "Settings view clear" }
+            logger.trace { "Setting view clear" }
             BGFX.bgfx_set_view_clear(
                 0,
                 BGFX.BGFX_CLEAR_COLOR or BGFX.BGFX_CLEAR_DEPTH or BGFX.BGFX_CLEAR_STENCIL,
-                0x00000000, 1.0f, 0
+                color(0x00, 0x00, 0x00, 0x00), 1.0f, 0
             )
 
             logger.trace { "Adding Screen" }
@@ -213,6 +228,11 @@ class Window(
         } finally {
             cleanup()
         }
+    }
+
+    private fun onFBResize(@Suppress("UNUSED_PARAMETER") window: Long, width: Int, height: Int) {
+        this.fbWidth = width
+        this.fbHeight = height
     }
 
     private fun onResize(@Suppress("UNUSED_PARAMETER") window: Long, width: Int, height: Int) {

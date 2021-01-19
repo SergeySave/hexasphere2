@@ -231,6 +231,6 @@ class SDFFont(
             VertexAttribute(VertexAttribute.Attribute.TEXCOORD0, 2, VertexAttribute.Type.FLOAT)
         )
         private val VERTEX_LAYOUT_HANDLE = VertexLayoutHandle.new(VERTEX_LAYOUT)
-        private val SHADER = ShaderProgram.loadFromFiles("/sdffont/vs", "/sdffont/fs")
+        private val SHADER = ShaderProgram.loadFromFiles("sdffont/vs", "sdffont/fs")
     }
 }

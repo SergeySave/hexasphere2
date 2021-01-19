@@ -7,7 +7,7 @@ build/
 # ShaderC tools
 tools/windows/
 tools/linux/
-tools/macos/
+tools/macosx/
 
 # Shader Outputs
 src/main/resources/shaders/
@@ -21,5 +21,6 @@ core.*.dmp
 javacore.*.txt
 jitdump.*.dmp
 Snap.*.trc
+hs_err_pid*.log
 
 sdf.png

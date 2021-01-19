@@ -1,6 +1,7 @@
 package com.sergeysav.hexasphere.client.localization
 
 import com.sergeysav.hexasphere.client.IOUtil
+import java.io.IOException
 import java.nio.file.FileSystems
 import java.util.Scanner
 
@@ -10,8 +11,9 @@ object L10n {
 
     fun load(locale: String) {
         mapping.clear()
-        val locFilePath = FileSystems.getDefault().getPath(IOUtil.getResourcePath("/localization/$locale.loc"))
-        Scanner(locFilePath).use { scan ->
+        val resourcePath = "/localization/$locale.loc"
+        val resource = IOUtil::class.java.getResource(resourcePath) ?: throw IOException("Locale resource not found: $resourcePath")
+        Scanner(resource.openStream()).use { scan ->
             while (scan.hasNextLine()) {
                 val line = scan.nextLine()
                 if (line.startsWith("#")) continue
