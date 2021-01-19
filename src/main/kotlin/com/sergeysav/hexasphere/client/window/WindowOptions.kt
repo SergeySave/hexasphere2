@@ -1,5 +1,6 @@
 package com.sergeysav.hexasphere.client.window
 
+import mu.KotlinLogging
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.system.Platform
 
@@ -9,10 +10,12 @@ data class WindowOptions(
     val debug: Int? = null
 ) {
     companion object {
+        private val logger = KotlinLogging.logger {  }
+        
         val DEFAULT_RENDERER: Int
             get() = when (Platform.get()) {
                 Platform.LINUX -> BGFX.BGFX_RENDERER_TYPE_VULKAN
-                Platform.MACOSX -> BGFX.BGFX_RENDERER_TYPE_METAL
+                Platform.MACOSX -> BGFX.BGFX_RENDERER_TYPE_OPENGL
                 Platform.WINDOWS -> BGFX.BGFX_RENDERER_TYPE_DIRECT3D9
                 else -> BGFX.BGFX_RENDERER_TYPE_COUNT
             }
@@ -41,6 +44,7 @@ data class WindowOptions(
             } else if (Platform.get() == Platform.MACOSX) {
                 if (args.contains("--mtl")) {
                     renderer = BGFX.BGFX_RENDERER_TYPE_METAL
+                    logger.warn { "macOS Metal Backend not fully supported. On newer version of macOS this may crash." }
                 }
             }
 
