@@ -18,6 +18,7 @@ import org.joml.Matrix3f
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.system.MemoryStack
+import org.lwjgl.system.MemoryUtil
 
 class CityRenderSystem : BaseEntitySystem(Aspect.all(TileFeaturePositionComponent::class.java, TileComponent::class.java, CityFeatureComponent::class.java)) {
 
@@ -26,6 +27,7 @@ class CityRenderSystem : BaseEntitySystem(Aspect.all(TileFeaturePositionComponen
     private val mat3 = Matrix3f()
     private val model = Matrix4f()
     private val rotation = Matrix4f()
+    private val buffer = MemoryUtil.memAlloc(64)
     private val instanceStride = 64
 
     private lateinit var renderDataSystem: RenderDataSystem
@@ -54,7 +56,6 @@ class CityRenderSystem : BaseEntitySystem(Aspect.all(TileFeaturePositionComponen
     override fun processSystem() {
         val entities = subscription.entities
         MemoryStack.stackPush().use { stack ->
-            val buffer = stack.malloc(64)
             stack.withInstanceBuffer(cities, instanceStride) { instance ->
                 val data = instance.handle.data()
 
@@ -95,5 +96,6 @@ class CityRenderSystem : BaseEntitySystem(Aspect.all(TileFeaturePositionComponen
     override fun dispose() {
         renderModel.dispose()
         renderDataSystem.featureShader.dispose()
+        MemoryUtil.memFree(buffer)
     }
 }
