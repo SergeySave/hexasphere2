@@ -83,14 +83,12 @@ runtime {
     }
 
     jpackage {
-        installerType = "deb"
         imageName = "Hexasphere2"
         installerName = "Hexasphere2"
         def currentOs = OperatingSystem.current()
         def imgType = currentOs.windows ? 'ico' : currentOs.macOsX ? 'icns' : 'png'
         imageOptions += ['--icon', "src/main/resources/icon.$imgType"]
         installerOptions += ['--resource-dir', "src/main/resources"]
-        println("$bundleVendor")
         installerOptions += ['--vendor', "$bundleVendor"]
         if(currentOs.windows) {
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
@@ -99,6 +97,7 @@ runtime {
             installerOptions += ['--linux-package-name', "$bundleName",'--linux-shortcut']
         }
         else if (currentOs.macOsX) {
+            appVersion = version.toString().replaceAll("[^0-9]", "")
             installerOptions += ['--mac-package-name', "$bundleName"]
         }
     }
@@ -285,7 +284,7 @@ class BGFXShaderCPlugin implements Plugin<Project> {
     }
 
     private static def compileShader(String shader, String vsflags, String fsflags, String csflags, String directory, String toolsDir, String toolsExt, Project project, BGFXShaderCPluginExtension extension) {
-        String[] shaderParts = shader.split(File.separator)
+        String[] shaderParts = shader.split((File.separator == "\\" ? "\\\\" : File.separator))
         String baseShaderName = shaderParts[shaderParts.length - 1]
         project.file("$extension.outputDir${File.separator}$directory${File.separator}${shaderParts.init().join("${File.separator}")}").mkdirs()
         project.exec {
