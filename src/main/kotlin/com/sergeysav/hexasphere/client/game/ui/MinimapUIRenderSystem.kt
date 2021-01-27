@@ -21,13 +21,14 @@ class MinimapUIRenderSystem : BaseSystem() {
         val height = renderDataSystem.height.toFloat() / 3
 
         Encoder.with {
+            setState(Encoder.UI)
             DebugRender.fillQuad(
                 this,
                 renderDataSystem.uiView,
                 vec3a.set(0f, 0f, 0f),
-                vec3d.set(width, 0f, 0f),
-                vec3c.set(width, height, 0f),
                 vec3b.set(0f, height, 0f),
+                vec3c.set(width, height, 0f),
+                vec3d.set(width, 0f, 0f),
                 color(0x55, 0x55, 0x55, 0xFF)
             )
         }

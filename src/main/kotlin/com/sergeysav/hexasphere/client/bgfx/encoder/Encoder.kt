@@ -92,6 +92,10 @@ inline class Encoder(val handle: Long) {
                 BGFX.BGFX_STATE_MSAA or
                 BGFX.BGFX_STATE_CULL_CCW or
                 BGFX.BGFX_STATE_BLEND_ALPHA
+        val UI = BGFX.BGFX_STATE_WRITE_RGB or BGFX.BGFX_STATE_WRITE_A or
+                BGFX.BGFX_STATE_MSAA or
+                BGFX.BGFX_STATE_CULL_CCW or
+                BGFX.BGFX_STATE_BLEND_ALPHA
 
         inline fun <T> with(forThread: Boolean = false, inner: Encoder.()->T): T {
             val encoder = Encoder(BGFX.bgfx_encoder_begin(forThread))
