@@ -48,8 +48,8 @@ jobs:
         with:
           name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-deb
           path: build/jpackage/*.deb
-      - name: Upload RPM as an artifact
+      - name: Upload Image as an artifact
         uses: actions/upload-artifact@v2
         with:
-          name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-rpm
-          path: build/jpackage/*.rpm
+          name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-image
+          path: build/jpackage/Hexasphere2
