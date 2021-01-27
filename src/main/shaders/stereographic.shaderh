@@ -23,7 +23,7 @@ vec4 computeStereographicPosition(vec4 modelPosition) {
 
     // Only take the rotation component of the view matrix
     // This will rotate the model to face the correct direction
-    vec3 sphereCoord = mul(mat3(u_view), modelPosition.xyz);
+    vec3 sphereCoord = mul(mat3FromMat4(u_view), modelPosition.xyz);
     // Compute the distance (which will be used to normalize and add a parallax effect)
     float distance = length(sphereCoord);
     // Perform the normalization
