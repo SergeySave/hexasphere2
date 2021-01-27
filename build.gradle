@@ -7,7 +7,7 @@ plugins {
     id 'org.beryx.runtime' version '1.12.1'
 }
 group = 'com.sergeysav'
-version = '0.0.1'
+version = '1.0-SNAPSHOT'
 
 switch (OperatingSystem.current()) {
     case OperatingSystem.LINUX:
@@ -138,6 +138,10 @@ class BGFXShaderCPlugin implements Plugin<Project> {
 
         def extension = project.extensions.create('bgfxShaderC', BGFXShaderCPluginExtension)
 
+        extension.toolsDir = extension.toolsDir.replace('/', File.separator)
+        extension.inputDir = extension.inputDir.replace('/', File.separator)
+        extension.outputDir = extension.outputDir.replace('/', File.separator)
+
         String toolsExt = ""
         String toolsDir = ""
         boolean chmod = true
@@ -166,11 +170,11 @@ class BGFXShaderCPlugin implements Plugin<Project> {
         if (!toolsFolder.exists()) {
             toolsFolder.mkdir()
         }
-        File toolsOSFolder = project.file("$extension.toolsDir/$toolsDir")
+        File toolsOSFolder = project.file("$extension.toolsDir${File.separator}$toolsDir")
         if (!toolsOSFolder.exists()) {
             toolsOSFolder.mkdir()
         }
-        File shadercExecutable = project.file("$extension.toolsDir/$toolsDir/shaderc$toolsExt")
+        File shadercExecutable = project.file("$extension.toolsDir${File.separator}$toolsDir${File.separator}shaderc$toolsExt")
         if (!shadercExecutable.exists()) {
             new URL("https://build.lwjgl.org/release/$project.ext.lwjglVersion/$toolsDir/$bitness/bgfx-tools/shaderc$toolsExt").withInputStream{ i -> shadercExecutable.withOutputStream{ it << i }}
             if (chmod) {
@@ -195,7 +199,9 @@ class BGFXShaderCPlugin implements Plugin<Project> {
         project.task('compileShaders') {
             doLast {
                 if (extension.includeDir == null) {
-                    extension.includeDir = extension.toolsDir + "/include"
+                    extension.includeDir = extension.toolsDir + "${File.separator}include"
+                } else {
+                    extension.includeDir = extension.includeDir.replace('/', File.separator)
                 }
                 if (OperatingSystem.current() != OperatingSystem.WINDOWS && (extension.dx9 || extension.dx11)) {
                     println("DirectX Output is only supported on Windows - Disabling DirectX Outputs.")
@@ -279,16 +285,16 @@ class BGFXShaderCPlugin implements Plugin<Project> {
     }
 
     private static def compileShader(String shader, String vsflags, String fsflags, String csflags, String directory, String toolsDir, String toolsExt, Project project, BGFXShaderCPluginExtension extension) {
-        String[] shaderParts = shader.split("/")
+        String[] shaderParts = shader.split(File.separator)
         String baseShaderName = shaderParts[shaderParts.length - 1]
-        project.file("$extension.outputDir/$directory/${shaderParts.init().join("/")}").mkdirs()
+        project.file("$extension.outputDir${File.separator}$directory${File.separator}${shaderParts.init().join("${File.separator}")}").mkdirs()
         project.exec {
             List<String> command = new ArrayList<String>()
-            command.add("${extension.toolsDir}/$toolsDir/shaderc$toolsExt")
+            command.add("${extension.toolsDir}${File.separator}$toolsDir${File.separator}shaderc$toolsExt")
             command.add('-f')
-            command.add("${extension.inputDir}/${shader}.sc")
+            command.add("${extension.inputDir}${shader}.sc")
             command.add('-o')
-            command.add("${extension.outputDir}/$directory/${shader}.bin")
+            command.add("${extension.outputDir}${File.separator}$directory${shader}.bin")
             command.add('-i')
             command.add(extension.includeDir)
             if (baseShaderName.startsWith("vs")) {
