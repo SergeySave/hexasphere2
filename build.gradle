@@ -115,6 +115,26 @@ bgfxShaderC {
     pssl = false
 }
 
+task downloadSkybox() {
+    File nasa1k = project.file("src/main/resources/skybox/nasa1k.ktx")
+    File nasa2k = project.file("src/main/resources/skybox/nasa2k.ktx")
+    if (!nasa1k.exists()) {
+        doLast {
+            new URL("https://www.dropbox.com/s/bhlxvxl8w43ig5t/nasa1k.ktx")
+                    .withInputStream { i -> nasa1k.withOutputStream { it << i } }
+        }
+    }
+    if (!nasa2k.exists()) {
+        doLast {
+            new URL("https://www.dropbox.com/s/u52qrz9c902zeln/nasa2k.ktx")
+                    .withInputStream { i -> nasa2k.withOutputStream { it << i } }
+        }
+    }
+}
+
+processResources.dependsOn(downloadSkybox)
+
+
 
 
 // Shader C Plugin Stuffs
