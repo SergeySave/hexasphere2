@@ -38,11 +38,6 @@ jobs:
         with:
           name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-exe
           path: build/jpackage/*.exe
-      - name: Upload MSI as an artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-msi
-          path: build/jpackage/*.msi
       - name: Upload DEB as an artifact
         uses: actions/upload-artifact@v2
         with:
@@ -52,9 +47,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-image
-          path: build/jpackage/Hexasphere2
+          path: build/jpackage/H*xasphere
       - name: Upload App as an artifact
         uses: actions/upload-artifact@v2
         with:
           name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-app
-          path: build/jpackage/Hexasphere2.app
+          path: build/jpackage/H*xasphere.app
