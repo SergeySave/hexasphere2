@@ -13,8 +13,6 @@ import com.sergeysav.hexasphere.client.game.ui.MinimapUIRenderSystem
 import com.sergeysav.hexasphere.client.settings.SettingsSystem
 import com.sergeysav.hexasphere.common.ecs.SystemPriority
 import com.sergeysav.hexasphere.common.game.Game
-import com.sergeysav.hexasphere.common.game.tile.TileSystem
-import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
 
 class ClientGameManager(renderSystemInit: WorldConfigurationBuilder.()->Unit) {
 
@@ -35,6 +33,7 @@ class ClientGameManager(renderSystemInit: WorldConfigurationBuilder.()->Unit) {
 
     init {
         world.getSystem(DebugUIRenderSystem::class.java).isEnabled = false
+        world.getSystem(MinimapUIRenderSystem::class.java).isEnabled = false
     }
 
     fun process(delta: Double, width: Double, height: Double) {

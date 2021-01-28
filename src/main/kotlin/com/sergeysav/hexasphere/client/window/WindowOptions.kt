@@ -16,7 +16,7 @@ data class WindowOptions(
             get() = when (Platform.get()) {
                 Platform.LINUX -> BGFX.BGFX_RENDERER_TYPE_VULKAN
                 Platform.MACOSX -> BGFX.BGFX_RENDERER_TYPE_OPENGL
-                Platform.WINDOWS -> BGFX.BGFX_RENDERER_TYPE_DIRECT3D9
+                Platform.WINDOWS -> BGFX.BGFX_RENDERER_TYPE_DIRECT3D11
                 else -> BGFX.BGFX_RENDERER_TYPE_COUNT
             }
         val DEFAULT_PCIID: Short

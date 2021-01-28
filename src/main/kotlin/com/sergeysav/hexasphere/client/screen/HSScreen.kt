@@ -4,6 +4,7 @@ import com.sergeysav.hexasphere.client.game.ClientGameManager
 import com.sergeysav.hexasphere.client.game.skybox.SkyboxRenderSystem
 import com.sergeysav.hexasphere.client.game.tile.HexasphereRenderSystem
 import com.sergeysav.hexasphere.client.game.ui.DebugUIRenderSystem
+import com.sergeysav.hexasphere.client.game.ui.MinimapUIRenderSystem
 import com.sergeysav.hexasphere.client.hexasphere.clientAddToWorld
 import com.sergeysav.hexasphere.client.input.Action
 import com.sergeysav.hexasphere.client.input.Key
@@ -68,6 +69,9 @@ class HSScreen : Screen {
 
         if (clientGameManager.inputManager.isKeyJustUp(Key.F3)) {
             clientGameManager.world.getSystem(DebugUIRenderSystem::class.java).flipEnabled()
+        }
+        if (clientGameManager.inputManager.isKeyJustUp(Key.M)) {
+            clientGameManager.world.getSystem(MinimapUIRenderSystem::class.java).flipEnabled()
         }
 
         clientGameManager.process(delta, width.toDouble(), height.toDouble())
