@@ -4,7 +4,7 @@ import org.gradle.internal.os.OperatingSystem
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.4.21'
     id 'application'
-    id 'org.beryx.runtime' version '1.12.1'
+    id 'org.beryx.jlink' version '2.23.2'
 }
 group = 'com.sergeysav'
 version = '1.0-SNAPSHOT'
@@ -53,16 +53,26 @@ dependencies {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "14"
     kotlinOptions {
         freeCompilerArgs = ["-Xinline-classes"]
     }
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "14"
     kotlinOptions {
         freeCompilerArgs = ["-Xinline-classes"]
+    }
+}
+
+compileKotlin.destinationDir = compileJava.destinationDir
+
+compileJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath
+        ]
     }
 }
 
@@ -72,17 +82,33 @@ java {
 }
 
 application {
+    mainModule = "com.sergeysav.hexasphere"
     mainClassName = "com.sergeysav.hexasphere.MainKt"
     applicationDefaultJvmArgs = ["-XX:+IgnoreUnrecognizedVMOptions", "-XstartOnFirstThread"]
 }
 
-runtime {
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jlink {
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
     launcher {
         noConsole = true
+        jvmArgs = application.applicationDefaultJvmArgs
     }
+    mergedModule {
+        forceMerge 'kotlin'
+        forceMerge 'lwjgl'
 
+        requires 'java.naming'
+        requires 'java.xml'
+        requires 'jdk.unsupported'
+
+        uses 'ch.qos.logback.classic.spi.Configurator'
+    }
     jpackage {
+        jvmArgs = application.applicationDefaultJvmArgs
         imageName = "Hexasphere"
         installerName = "Hexasphere"
         def currentOs = OperatingSystem.current()
@@ -114,14 +140,8 @@ bgfxShaderC {
 }
 
 task downloadSkybox() {
-    File nasa1k = project.file("src/main/resources/skybox/nasa1k.ktx")
     File nasa2k = project.file("src/main/resources/skybox/nasa2k.ktx")
-    if (!nasa1k.exists()) {
-        doFirst {
-            new URL("https://dl.dropboxusercontent.com/s/bhlxvxl8w43ig5t/nasa1k.ktx")
-                    .withInputStream { i -> nasa1k.withOutputStream { it << i } }
-        }
-    }
+
     if (!nasa2k.exists()) {
         doFirst {
             new URL("https://dl.dropboxusercontent.com/s/u52qrz9c902zeln/nasa2k.ktx")

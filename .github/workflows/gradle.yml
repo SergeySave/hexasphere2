@@ -22,10 +22,6 @@ jobs:
         run: echo $JAVA_HOME
       - name: Verify Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
-      - name: Execute build
-        run: ./gradlew --info --stacktrace build
-      - name: Execute runtime
-        run: ./gradlew --info --stacktrace runtime
       - name: Execute jpackage
         run: ./gradlew --info --stacktrace jpackage
       - name: Upload DMG as an artifact
@@ -38,6 +34,11 @@ jobs:
         with:
           name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-exe
           path: build/jpackage/*.exe
+      - name: Upload MSI as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: hexasphere-jdk${{ matrix.java }}-${{ matrix.os }}-msi
+          path: build/jpackage/*.msi
       - name: Upload DEB as an artifact
         uses: actions/upload-artifact@v2
         with:
