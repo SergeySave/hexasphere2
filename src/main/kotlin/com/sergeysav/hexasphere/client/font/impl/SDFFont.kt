@@ -119,6 +119,7 @@ class SDFFont(
             val bgfxMemory = BGFX.bgfx_make_ref_release(bitmap, BGFXUtil.releaseMemoryCb, MemoryUtil.NULL)
             texture = Texture(BGFX.bgfx_create_texture_2d(bitmapSize, bitmapSize, false, 1, format, BGFX.BGFX_TEXTURE_NONE, bgfxMemory))
         }
+        spaceSize = computeWidth(" ")
     }
 
     override fun computeHeight(text: CharSequence): Double {

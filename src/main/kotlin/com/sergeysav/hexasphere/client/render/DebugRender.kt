@@ -7,6 +7,7 @@ import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayout
 import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayoutHandle
 import com.sergeysav.hexasphere.client.bgfx.vertex.withTransientVertexBuffer
 import com.sergeysav.hexasphere.client.bgfx.view.View
+import com.sergeysav.hexasphere.common.color.Color
 import org.joml.Vector3fc
 import org.lwjgl.system.MemoryStack
 
@@ -21,16 +22,16 @@ object DebugRender {
 
     private val vertexLayoutHandle: VertexLayoutHandle = VertexLayoutHandle.new(vertexLayout)
 
-    fun fillQuad(encoder: Encoder, view: View, p1: Vector3fc, p2: Vector3fc, p3: Vector3fc, p4: Vector3fc, color: Int, depth: Int = 0) {
+    fun fillQuad(encoder: Encoder, view: View, p1: Vector3fc, p2: Vector3fc, p3: Vector3fc, p4: Vector3fc, color: Color, depth: Int = 0) {
         MemoryStack.stackPush().use { stack ->
             stack.withTransientVertexBuffer(6, vertexLayout) {
                 it.handle.data()
-                    .putFloat(p1.x()).putFloat(p1.y()).putFloat(p1.z()).putInt(color)
-                    .putFloat(p2.x()).putFloat(p2.y()).putFloat(p2.z()).putInt(color)
-                    .putFloat(p3.x()).putFloat(p3.y()).putFloat(p3.z()).putInt(color)
-                    .putFloat(p3.x()).putFloat(p3.y()).putFloat(p3.z()).putInt(color)
-                    .putFloat(p4.x()).putFloat(p4.y()).putFloat(p4.z()).putInt(color)
-                    .putFloat(p1.x()).putFloat(p1.y()).putFloat(p1.z()).putInt(color)
+                    .putFloat(p1.x()).putFloat(p1.y()).putFloat(p1.z()).putInt(color.value)
+                    .putFloat(p2.x()).putFloat(p2.y()).putFloat(p2.z()).putInt(color.value)
+                    .putFloat(p3.x()).putFloat(p3.y()).putFloat(p3.z()).putInt(color.value)
+                    .putFloat(p3.x()).putFloat(p3.y()).putFloat(p3.z()).putInt(color.value)
+                    .putFloat(p4.x()).putFloat(p4.y()).putFloat(p4.z()).putInt(color.value)
+                    .putFloat(p1.x()).putFloat(p1.y()).putFloat(p1.z()).putInt(color.value)
                     .flip()
                 encoder.apply {
                     setVertexBuffer(it, vertexLayoutHandle, 6)

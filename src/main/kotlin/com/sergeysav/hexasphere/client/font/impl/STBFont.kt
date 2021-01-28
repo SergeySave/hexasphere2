@@ -15,6 +15,7 @@ abstract class STBFont(ttf: ByteBuffer) : Font {
     protected var texture = Texture(0)
     protected var lineGap = 0f
     protected var ascent = 0f
+    protected var spaceSize = 0.0
 
     init {
         if (!STBTruetype.stbtt_InitFont(fontInfo, ttf)) error("Failed to initialize STB TTF")
@@ -34,6 +35,8 @@ abstract class STBFont(ttf: ByteBuffer) : Font {
             width * scale.toDouble()
         }
     }
+
+    override fun getSpaceWidth(): Double = spaceSize
 
     override fun getLineStep(): Double = ascent.toDouble() - descent.toDouble() + lineGap.toDouble()
 

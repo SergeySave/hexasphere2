@@ -7,7 +7,7 @@ import com.sergeysav.hexasphere.client.input.KeyModifiers
 import com.sergeysav.hexasphere.client.input.MouseButton
 import com.sergeysav.hexasphere.client.window.screen.Screen
 import com.sergeysav.hexasphere.client.window.screen.ScreenAction
-import com.sergeysav.hexasphere.common.color
+import com.sergeysav.hexasphere.common.color.Color
 import mu.KotlinLogging
 import org.lwjgl.bgfx.BGFX
 import org.lwjgl.bgfx.BGFXInit
@@ -148,7 +148,7 @@ class Window(
             BGFX.bgfx_set_view_clear(
                 0,
                 BGFX.BGFX_CLEAR_COLOR or BGFX.BGFX_CLEAR_DEPTH or BGFX.BGFX_CLEAR_STENCIL,
-                color(0x00, 0x00, 0x00, 0x00), 1.0f, 0
+                Color.BLACK.value, 1.0f, 0
             )
 
             logger.trace { "Adding Screen" }

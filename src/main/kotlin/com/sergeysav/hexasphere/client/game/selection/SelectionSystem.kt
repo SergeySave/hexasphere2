@@ -2,7 +2,6 @@ package com.sergeysav.hexasphere.client.game.selection
 
 import com.artemis.BaseSystem
 import com.artemis.managers.GroupManager
-import com.sergeysav.hexasphere.client.bgfx.BGFXUtil
 import com.sergeysav.hexasphere.client.game.SphereRayIntersect
 import com.sergeysav.hexasphere.client.game.camera.CameraSystem
 import com.sergeysav.hexasphere.client.game.input.InputManagerSystem
@@ -70,14 +69,13 @@ class SelectionSystem : BaseSystem() {
                 }
             }
             RenderDataSystem.RenderMode.STEREOGRAPHIC -> {
-                vec3a.x = -(2 * inputManager.getMouseX() / renderDataSystem.width - 1).toFloat()
-                vec3a.y = (2 * inputManager.getMouseY() / renderDataSystem.height - 1).toFloat()
-                vec3a.z = if (BGFXUtil.zZeroToOne) 0.9f else 0.8f // WHY?????? Why 0.9 and 0.8 and why does it matter
-                // if the renderer uses a [0,1] z buffer or a [-1, 1] z buffer?????
+                vec3a.x = (2 * inputManager.getMouseX() / renderDataSystem.width - 1).toFloat()
+                vec3a.y = -(2 * inputManager.getMouseY() / renderDataSystem.height - 1).toFloat()
+                vec3a.z = 1f
 
                 cameraSystem.camera.projectionMatrix.invert(mat4a)
                 vec3a.mulProject(mat4a) // vec3a now contains the post-scaling projection
-                vec2.set(vec3a.x(), vec3a.y()) // now vec2 has it
+                vec2.set(vec3a.x() / vec3a.z(), vec3a.y() / vec3a.z()) // now vec2 has it
 
                 // I'd think that this column was simply the camera's position but that doesnt seem to work
                 val scaling = (cameraSystem.camera.viewMatrix.getColumn(3, vec3b).length() - 1) * 0.5

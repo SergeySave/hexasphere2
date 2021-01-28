@@ -17,6 +17,13 @@ interface Font {
     fun computeWidth(text: CharSequence): Double
 
     /**
+     * Get the width of a space character
+     *
+     * @return the width of a single space character
+     */
+    fun getSpaceWidth(): Double
+
+    /**
      * Compute the height of a string of text
      *
      * @param text the text for which to compute the height

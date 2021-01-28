@@ -36,6 +36,22 @@ class InputManagerImpl : InputManager {
     override fun getMouseButtonDownInt(button: MouseButton) = if (isMouseButtonDown(button)) 1 else 0
     override fun getMouseButtonDownTime(button: MouseButton) = mouseButtonDownTime[button.ordinal]
 
+    override fun consumeMouseEvents() {
+        mouseButtonsJustDown.clear()
+        mouseButtonsJustUp.clear()
+
+        lastMouseX = mouseX
+        lastMouseY = mouseY
+
+        scrollX = 0.0
+        scrollY = 0.0
+    }
+
+    override fun consumeKeyEvents() {
+        keysJustDown.clear()
+        keysJustUp.clear()
+    }
+
     override fun getMouseX() = mouseX
     override fun getMouseY() = mouseY
     override fun getMouseDX() = mouseX - lastMouseX
@@ -45,17 +61,8 @@ class InputManagerImpl : InputManager {
     override fun getScrollY() = scrollY
 
     override fun update(delta: Double) {
-        keysJustDown.clear()
-        keysJustUp.clear()
-
-        mouseButtonsJustDown.clear()
-        mouseButtonsJustUp.clear()
-
-        lastMouseX = mouseX
-        lastMouseY = mouseY
-
-        scrollX = 0.0
-        scrollY = 0.0
+        consumeKeyEvents()
+        consumeMouseEvents()
 
         for (i in mouseButtonDownTime.indices) {
             if (mouseButtonsDown[i]) {
@@ -83,12 +90,10 @@ class InputManagerImpl : InputManager {
     override fun handleOnMouseButton(action: Action, button: MouseButton, keyModifiers: KeyModifiers) {
         when (action) {
             Action.RELEASE -> {
-//                mouseButtonsDown.remove(button)
                 mouseButtonsDown[button.ordinal] = false
                 mouseButtonsJustUp.add(button)
             }
             Action.PRESS -> {
-//                mouseButtonsDown.add(button)
                 mouseButtonsDown[button.ordinal] = true
                 mouseButtonsJustDown.add(button)
                 mouseButtonDownTime[button.ordinal] = 0.0

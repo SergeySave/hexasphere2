@@ -6,5 +6,7 @@ enum class MouseButton {
     MIDDLE,
     UNKNOWN;
 
-    companion object
+    companion object {
+        val VALUES = values().toList()
+    }
 }

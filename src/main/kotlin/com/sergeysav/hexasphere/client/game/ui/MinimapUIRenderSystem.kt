@@ -4,7 +4,7 @@ import com.artemis.BaseSystem
 import com.sergeysav.hexasphere.client.bgfx.encoder.Encoder
 import com.sergeysav.hexasphere.client.game.render.RenderDataSystem
 import com.sergeysav.hexasphere.client.render.DebugRender
-import com.sergeysav.hexasphere.common.color
+import com.sergeysav.hexasphere.common.color.Color
 import org.joml.Vector3f
 
 class MinimapUIRenderSystem : BaseSystem() {
@@ -29,7 +29,7 @@ class MinimapUIRenderSystem : BaseSystem() {
                 vec3b.set(0f, height, 0f),
                 vec3c.set(width, height, 0f),
                 vec3d.set(width, 0f, 0f),
-                color(0x55, 0x55, 0x55, 0xFF)
+                Color(0x55, 0x55, 0x55, 0xFF)
             )
         }
     }

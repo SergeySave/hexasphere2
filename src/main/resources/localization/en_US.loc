@@ -1,8 +1,14 @@
 
 ui.debug.fps.format=FPS: %.0f
-ui.selected_tile.format=Selected Tile: %s
+
+ui.selection.selected_tile.format=Selected Tile: %s
+ui.selection.no_features.text=No Features Present
+ui.selection.feature_present.format=Feature Present: %s
+ui.selection.set_type.format=Set Type: %s
 
 tile.none.name=None
 tile.grassland.name=Grassland
 tile.coast.name=Coast
 tile.ocean.name=Ocean
+
+feature.city.name=City

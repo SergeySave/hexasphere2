@@ -12,12 +12,9 @@ import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayout
 import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayoutHandle
 import com.sergeysav.hexasphere.client.game.render.RenderDataSystem
 import com.sergeysav.hexasphere.client.game.selection.SelectionSystem
-import com.sergeysav.hexasphere.common.blueComponent
-import com.sergeysav.hexasphere.common.color
+import com.sergeysav.hexasphere.common.color.Color
 import com.sergeysav.hexasphere.common.game.Groups
 import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
-import com.sergeysav.hexasphere.common.greenComponent
-import com.sergeysav.hexasphere.common.redComponent
 import org.joml.Matrix4f
 import org.joml.Vector3d
 import org.joml.Vector4f
@@ -68,7 +65,7 @@ class HexasphereRenderSystem(
         outlineSettingsUniform.dispose()
     }
 
-    private fun setTileVerts(geometry: TileGeometryComponent, color: Int, outlineColor: Int): Int {
+    private fun setTileVerts(geometry: TileGeometryComponent, color: Color, outlineColor: Color): Int {
         val numVerts = if (geometry.vertices[5].lengthSquared() >= 1e-4) 6 else 5
         vec3a.zero()
         for (j in 0 until numVerts) {
@@ -77,16 +74,16 @@ class HexasphereRenderSystem(
             hexVerts.putFloat(vert.x().toFloat())
                 .putFloat(vert.y().toFloat())
                 .putFloat(vert.z().toFloat())
-                .putInt(color)
-                .putInt(outlineColor)
+                .putInt(color.value)
+                .putInt(outlineColor.value)
                 .put((-1).toByte())
         }
         vec3a.div(numVerts.toDouble())
         hexVerts.putFloat(vec3a.x().toFloat())
             .putFloat(vec3a.y().toFloat())
             .putFloat(vec3a.z().toFloat())
-            .putInt(color)
-            .putInt(outlineColor)
+            .putInt(color.value)
+            .putInt(outlineColor.value)
             .put(0.toByte())
 
         return numVerts
@@ -95,27 +92,15 @@ class HexasphereRenderSystem(
     override fun processSystem() {
         val dirtyTiles = groupManager.getEntityIds(Groups.DIRTY_TILE)
 
-        fun getTileColor(tile: Int): Int {
-//            return if (selectionSystem.selectedTile == tile) {
-//                val baseColor = tileTypeSystem.getTileType(tile)?.color ?: 0
-//                color(
-//                    0xFF - (0xFF - redComponent(baseColor)) * 3 / 4,
-//                    0xFF - (0xFF - greenComponent(baseColor)) * 3 / 4,
-//                    blueComponent(baseColor) * 3 / 4,
-//                    0xFF
-//                )
-//            } else {
-                return 0xFF000000.toInt() or (tileTypeSystem.getTileType(tile)?.color ?: 0)
-//            }
+        fun getTileColor(tile: Int): Color {
+            return (tileTypeSystem.getTileType(tile)?.color ?: Color.BLACK).alpha(1f)
         }
 
-        fun getTileOutlineColor(tile: Int, color: Int): Int {
-            return if (selectionSystem.selectedTile == tile) {
-                color(0xFF, 0xFF, 0xFF, 0x0F)
-            } else if (selectionSystem.mouseoverTile == tile) {
-                color(0xFF - redComponent(color), 0xFF - greenComponent(color), 0xFF - blueComponent(color), 0x08)
-            } else {
-                color(0x00, 0x00, 0x00, 0x00)
+        fun getTileOutlineColor(tile: Int, color: Color): Color {
+            return when {
+                selectionSystem.selectedTile == tile -> Color.WHITE.alpha(0.06f)
+                selectionSystem.mouseoverTile == tile -> (Color.WHITE xor color).alpha(0.03f)
+                else -> Color.BLACK.alpha(0)
             }
         }
 
@@ -130,8 +115,8 @@ class HexasphereRenderSystem(
                     this.iBufferPos = indices.position()
                 }
 
-                val color: Int = getTileColor(tile)
-                val outline: Int = getTileOutlineColor(tile, color)
+                val color: Color = getTileColor(tile)
+                val outline: Color = getTileOutlineColor(tile, color)
                 val v1 = geometry.vBufferPos / bytesPerVert
                 val numVerts = setTileVerts(geometry, color, outline)
                 for (j in 0 until numVerts) {
@@ -148,8 +133,8 @@ class HexasphereRenderSystem(
                 val tile = dirtyTiles[i]
 
                 val geometry = geomMapper.get(tile)
-                val color: Int = getTileColor(tile)
-                val outline: Int = getTileOutlineColor(tile, color)
+                val color: Color = getTileColor(tile)
+                val outline: Color = getTileOutlineColor(tile, color)
                 val v1 = geometry.vBufferPos / bytesPerVert
                 hexVerts.position(geometry.vBufferPos)
                 setTileVerts(geometry, color, outline)
