@@ -27,7 +27,7 @@ class HSScreen : Screen {
     private var time: Double = 0.0
 
     override fun create() {
-        val hex = Hexasphere.withSubdivisionLevel(5)
+        val hex = Hexasphere.withSubdivisionLevel(10)
 
         clientGameManager = ClientGameManager {
             with(SystemPriority.RENDER,
@@ -51,21 +51,6 @@ class HSScreen : Screen {
 
     override fun render(delta: Double, width: Int, height: Int): ScreenAction {
         time += delta
-
-//        val viewDirection = camera!!.projectToWorld(vec2.set(
-//            (2 * clientGameManager.inputManager.getMouseX() / width - 1).toFloat(),
-//            (2 * clientGameManager.inputManager.getMouseY() / height - 1).toFloat()
-//        ), vec3a)
-//        if (clientGameManager.inputManager.isMouseButtonJustUp(MouseButton.RIGHT)) {
-//            TileSelectionHelper.ifCouldSelectTile(clientGameManager, viewDirection, camera!!.position) { bestTile ->
-//                clientGameManager.tileType.setType<CoastTileTypeComponent>(bestTile)
-//            }
-//        }
-//        if (clientGameManager.inputManager.isMouseButtonJustUp(MouseButton.LEFT) && clientGameManager.inputManager.getMouseButtonDownTime(MouseButton.LEFT) < mouseHoldDragTime) {
-//            TileSelectionHelper.selectBestTileOrNone(clientGameManager, viewDirection, camera!!.position) { bestTile ->
-//                clientGameManager.selection.selectedTile = bestTile
-//            }
-//        }
 
         if (clientGameManager.inputManager.isKeyJustUp(Key.F3)) {
             clientGameManager.world.getSystem(DebugUIRenderSystem::class.java).flipEnabled()

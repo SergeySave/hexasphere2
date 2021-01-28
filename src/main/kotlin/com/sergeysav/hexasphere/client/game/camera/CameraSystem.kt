@@ -12,7 +12,7 @@ class CameraSystem : BaseSystem() {
 
     private val vec3a = Vector3f()
     private val vec3b = Vector3f()
-    val camera: PerspectiveCamera = PerspectiveCamera(zNear = 0.1f, zFar = 100f).apply {
+    val camera: PerspectiveCamera = PerspectiveCamera(zNear = 0.01f, zFar = 10f).apply {
         setFovDeg(45f)
         setPosition(vec3a.set(2f, 0f, 0f))
         lookAt(vec3a.set(0f, 0f, 0f))
