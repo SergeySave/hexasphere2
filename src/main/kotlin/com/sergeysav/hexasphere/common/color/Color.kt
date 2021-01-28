@@ -35,6 +35,7 @@ inline class Color(val value: Int) {
     operator fun plus(that: Color) = Color(this.red + that.red, this.green + that.green, this.blue + that.blue, this.alpha + that.alpha)
     operator fun minus(that: Color) = Color(this.red - that.red, this.green - that.green, this.blue - that.blue, this.alpha - that.alpha)
     infix fun xor(that: Color) = Color(this.red xor that.red, this.green xor that.green, this.blue xor that.blue, this.alpha xor that.alpha)
+    operator fun times(scalar: Float) = Color(this.redFloat * scalar, this.greenFloat * scalar, this.blueFloat * scalar, this.alphaFloat * scalar)
 
     companion object {
         val BLACK = Color(0x00,0x00,0x00)
