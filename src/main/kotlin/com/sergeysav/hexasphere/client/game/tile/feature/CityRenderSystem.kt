@@ -76,7 +76,8 @@ class CityRenderSystem : BaseEntitySystem(Aspect.all(TileFeaturePositionComponen
                     data.put(model.set(rotation)
                         .translate(part[cityFeatureComponent.featureNumber].x().toFloat(), part[cityFeatureComponent.featureNumber].y().toFloat(), 0f)
                         .scale(featurePositionComponent.radius.toFloat())
-                        .get(buffer.rewind()))
+                        .get(buffer))
+                    buffer.rewind()
                 }
                 data.rewind()
 
@@ -84,6 +85,7 @@ class CityRenderSystem : BaseEntitySystem(Aspect.all(TileFeaturePositionComponen
                     for (mesh in renderModel.meshes) {
                         setState(Encoder.DEFAULT_CW)
                         setTransform(model.identity().get(buffer))
+                        buffer.rewind()
                         setInstanceBuffer(instance, cities)
                         mesh.set(this)
                         submit(renderDataSystem.featureShader, renderDataSystem.featuresView)
