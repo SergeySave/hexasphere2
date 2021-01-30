@@ -1,5 +1,6 @@
 package com.sergeysav.hexasphere.common.color
 
+import java.nio.ByteBuffer
 import kotlin.math.roundToInt
 
 inline class Color(val value: Int) {
@@ -17,6 +18,10 @@ inline class Color(val value: Int) {
     val greenFloat: Float get() = green / 255f
     val blueFloat: Float get() = blue / 255f
     val alphaFloat: Float get() = alpha / 255f
+    val redByte: Byte get() = red.toByte()
+    val greenByte: Byte get() = green.toByte()
+    val blueByte: Byte get() = blue.toByte()
+    val alphaByte: Byte get() = alpha.toByte()
 
     operator fun component0() = red
     operator fun component1() = green
@@ -47,3 +52,6 @@ inline class Color(val value: Int) {
         val BLUE = Color(0x00,0x00,0xFF)
     }
 }
+
+fun ByteBuffer.putRGB(color: Color) = put(color.redByte).put(color.greenByte).put(color.blueByte)
+fun ByteBuffer.putRGBA(color: Color) = putRGB(color).put(color.alphaByte)

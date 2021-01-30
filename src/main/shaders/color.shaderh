@@ -1,0 +1,12 @@
+
+#ifndef HEXASPHERE_COLOR_SHADER_H
+#define HEXASPHERE_COLOR_SHADER_H
+
+// required for vec3_splat
+#include <bgfx_shader.shaderh>
+
+vec3 mixColorCorrected(vec3 a, vec3 b, float ratio) {
+    return sqrt( mix( pow(a, vec3_splat(2.0)), pow(b, vec3_splat(2.0)), ratio) );
+}
+
+#endif // HEXASPHERE_COLOR_SHADER_H

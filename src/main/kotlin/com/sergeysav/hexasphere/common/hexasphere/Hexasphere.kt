@@ -135,8 +135,8 @@ fun Hexasphere.addToWorld(world: World, tileEntityMap: Map<HexasphereTile, Int>?
     val tileTypeSystem = world.getSystem(TileTypeSystem::class.java)
     val cityMapper = world.getMapper(CityFeatureComponent::class.java)
 
-    val player1 = Player(Color.RED)
-    val player2 = Player(Color.BLUE)
+    val player1 = Player(Color.RED, Color(0xff, 0xa5, 0x00))
+    val player2 = Player(Color.BLUE, Color(0x00, 0xff, 0xff))
 
     val playerMapper = world.getMapper(PlayerComponent::class.java)
     val random = Random()

@@ -14,10 +14,13 @@ import com.sergeysav.hexasphere.client.bgfx.vertex.VertexLayoutHandle
 import com.sergeysav.hexasphere.client.game.render.RenderDataSystem
 import com.sergeysav.hexasphere.client.game.selection.SelectionSystem
 import com.sergeysav.hexasphere.common.color.Color
+import com.sergeysav.hexasphere.common.color.putRGB
+import com.sergeysav.hexasphere.common.color.putRGBA
 import com.sergeysav.hexasphere.common.game.Groups
 import com.sergeysav.hexasphere.common.game.tile.TileComponent
 import com.sergeysav.hexasphere.common.game.tile.TileOwnerSystem
 import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
+import com.sergeysav.hexasphere.common.setColor
 import org.joml.Matrix4f
 import org.joml.Vector3d
 import org.joml.Vector4f
@@ -32,12 +35,16 @@ class HexasphereRenderSystem(
         VertexAttribute(VertexAttribute.Attribute.POSITION, 3, VertexAttribute.Type.FLOAT),
         VertexAttribute(VertexAttribute.Attribute.COLOR0, 4, VertexAttribute.Type.UINT8, true),
         VertexAttribute(VertexAttribute.Attribute.COLOR1, 4, VertexAttribute.Type.UINT8, true),
+        VertexAttribute(VertexAttribute.Attribute.COLOR2, 4, VertexAttribute.Type.UINT8, true),
+        VertexAttribute(VertexAttribute.Attribute.COLOR3, 2, VertexAttribute.Type.FLOAT),
         VertexAttribute(VertexAttribute.Attribute.TEXCOORD1, 1, VertexAttribute.Type.UINT8, true)
     )
     private val vertLayoutHandle = VertexLayoutHandle.new(vertLayout)
     private val bytesPerVert = (3) * Float.SIZE_BYTES +
             (4) * Byte.SIZE_BYTES +
             (4) * Byte.SIZE_BYTES +
+            (4) * Byte.SIZE_BYTES +
+            (2) * Float.SIZE_BYTES +
             (1) * Byte.SIZE_BYTES
     private val verts = pentagons * 6 + hexagons * 7
     private val hexVerts = MemoryUtil.memAlloc(verts * bytesPerVert)
@@ -48,7 +55,8 @@ class HexasphereRenderSystem(
     private val model = Matrix4f()
     private val vec3a = Vector3d()
     private val vec4a = Vector4f()
-    private val outlineSettingsUniform = Uniform.new("u_outlineSettings", Uniform.Type.VEC4)
+    private val outlineSettingsAUniform = Uniform.new("u_outlineSettingsA", Uniform.Type.VEC4)
+    private val outlineSettingsBUniform = Uniform.new("u_outlineSettingsB", Uniform.Type.VEC4)
 
     private lateinit var geomMapper: ComponentMapper<TileGeometryComponent>
     private lateinit var tileMapper: ComponentMapper<TileComponent>
@@ -67,44 +75,60 @@ class HexasphereRenderSystem(
         indxBuffer?.dispose()
         MemoryUtil.memFree(modelBuffer)
         MemoryUtil.memFree(vec4Buffer)
-        outlineSettingsUniform.dispose()
-    }
-
-
-    private fun getTileColor(tile: Int): Color {
-        return (tileTypeSystem.getTileType(tile)?.color ?: Color.BLACK).alpha(1f)
-    }
-
-    private fun getTileOutlineColor(tile: Int, adjacent: Int, color: Color): Color {
-        return when {
-            selectionSystem.selectedTile == tile -> Color.WHITE.alpha(0.06f)
-            selectionSystem.mouseoverTile == tile -> (Color.WHITE xor color).alpha(0.03f)
-            tileOwnerSystem.getTileOwner(tile) != tileOwnerSystem.getTileOwner(adjacent) -> (tileOwnerSystem.getTileOwner(tile)?.teamColor?.alpha(0.03f) ?: Color.ZERO)
-            else -> Color.ZERO
-        }
+        outlineSettingsAUniform.dispose()
+        outlineSettingsBUniform.dispose()
     }
 
     private fun setTileVerts(geometry: TileGeometryComponent, tile: Int): Int {
         val numVerts = if (geometry.vertices[5].lengthSquared() >= 1e-4) 6 else 5
-        val color: Color = getTileColor(tile)
+        val color: Color = (tileTypeSystem.getTileType(tile)?.color ?: Color.BLACK)
 
         vec3a.zero()
         for (j in 0 until numVerts) {
             val vert = geometry.vertices[j]
             vec3a.add(vert)
+
+            var outer = Color.ZERO
+            var outerThickness = 0f
+            var inner = Color.ZERO
+            var innerThickness = 0f
+
+            if (tileOwnerSystem.getTileOwner(tile) != tileOwnerSystem.getTileOwner(tileMapper[tile].adjacent[j])) {
+                outer = (tileOwnerSystem.getTileOwner(tile)?.primaryColor?.alpha(1f) ?: Color.ZERO)
+                outerThickness = if (outer != Color.ZERO) 0.02f else 0f
+                inner = (tileOwnerSystem.getTileOwner(tile)?.secondaryColor?.alpha(0.5f) ?: Color.ZERO)
+                innerThickness = if (inner != Color.ZERO) 0.02f else 0f
+            }
+
+            if (selectionSystem.selectedTile == tile) {
+                outer = Color.WHITE.alpha(1f)
+                outerThickness = 0.02f
+            }
+
+            if (selectionSystem.mouseoverTile == tile) {
+                inner = (Color.WHITE xor color).alpha(1f)
+                innerThickness = 0.02f
+            }
+
             hexVerts.putFloat(vert.x().toFloat())
                 .putFloat(vert.y().toFloat())
                 .putFloat(vert.z().toFloat())
-                .putInt(color.value)
-                .putInt(getTileOutlineColor(tile, tileMapper[tile].adjacent[j], color).value)
+                .putRGB(color).put(0.toByte())
+                .putRGBA(outer)
+                .putRGBA(inner)
+                .putFloat(outerThickness)
+                .putFloat(innerThickness)
                 .put((-1).toByte())
         }
         vec3a.div(numVerts.toDouble())
         hexVerts.putFloat(vec3a.x().toFloat())
             .putFloat(vec3a.y().toFloat())
             .putFloat(vec3a.z().toFloat())
-            .putInt(color.value)
-            .putInt(Color.WHITE.value) // This value is unused
+            .putRGB(color).put(0.toByte())
+            .putRGBA(Color.ZERO) // These values are unused because of flat interpolation
+            .putRGBA(Color.ZERO)
+            .putFloat(0f)
+            .putFloat(0f)
             .put(0.toByte())
 
         return numVerts
@@ -160,8 +184,13 @@ class HexasphereRenderSystem(
             setVertexBuffer(vertBuffer, vertLayoutHandle, verts)
             setIndexBuffer(indxBuffer!!, (pentagons * 5 + hexagons * 6) * 3)
             setTransform(model.get(modelBuffer))
-            setUniform(outlineSettingsUniform, vec4a.set(0.00f, 0.0f, 0f, 0f).get(vec4Buffer))
+            setGlobalOutlineData(Color.BLACK.alpha(0.1f), 0.02f, 0f, 0.01f)
             submit(renderDataSystem.hexasphereShader, renderDataSystem.hexasphereView)
         }
+    }
+
+    private fun Encoder.setGlobalOutlineData(color: Color, thickness: Float, borderBaseSmoothing: Float, borderBorderSmoothing: Float) {
+        setUniform(outlineSettingsAUniform, vec4a.setColor(color).get(vec4Buffer))
+        setUniform(outlineSettingsBUniform, vec4a.set(thickness, borderBaseSmoothing, borderBorderSmoothing, 0f).get(vec4Buffer))
     }
 }
