@@ -133,6 +133,9 @@ class Window(
             logger.info { "Using renderer $renderer" }
             BGFXUtil.renderer = this.renderer
 
+            // TODO: Test with Metal and DX to see if they need to use first provoking
+            BGFXUtil.firstProvokingVertex = this.renderer != BGFX.BGFX_RENDERER_TYPE_OPENGL
+
             logger.trace { "Applying renderer settings" }
             BGFXUtil.zZeroToOne = !bgfxCaps.homogeneousDepth()
             logger.trace { "Homogenous Depth: ${bgfxCaps.homogeneousDepth()}" }

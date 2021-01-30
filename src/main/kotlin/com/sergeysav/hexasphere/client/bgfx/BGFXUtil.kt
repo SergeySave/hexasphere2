@@ -19,6 +19,7 @@ object BGFXUtil {
     }
     var texelHalf: Float = 0f
     var reset: Int = 0
+    var firstProvokingVertex: Boolean = false
 
     fun dispose() {
         releaseMemoryCb.free()

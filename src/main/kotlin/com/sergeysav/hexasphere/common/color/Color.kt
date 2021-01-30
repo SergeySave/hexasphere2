@@ -38,7 +38,12 @@ inline class Color(val value: Int) {
     operator fun times(scalar: Float) = Color(this.redFloat * scalar, this.greenFloat * scalar, this.blueFloat * scalar, this.alphaFloat * scalar)
 
     companion object {
+        val ZERO = Color(0x00,0x00,0x00, 0x00)
         val BLACK = Color(0x00,0x00,0x00)
         val WHITE = Color(0xFF,0xFF,0xFF)
+
+        val RED = Color(0xFF,0x00,0x00)
+        val GREEN = Color(0x00,0xFF,0x00)
+        val BLUE = Color(0x00,0x00,0xFF)
     }
 }

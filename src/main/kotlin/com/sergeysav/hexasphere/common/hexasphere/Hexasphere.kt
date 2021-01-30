@@ -3,7 +3,10 @@ package com.sergeysav.hexasphere.common.hexasphere
 import com.artemis.ArchetypeBuilder
 import com.artemis.World
 import com.artemis.managers.GroupManager
+import com.sergeysav.hexasphere.common.color.Color
 import com.sergeysav.hexasphere.common.game.Groups
+import com.sergeysav.hexasphere.common.game.player.Player
+import com.sergeysav.hexasphere.common.game.player.PlayerComponent
 import com.sergeysav.hexasphere.common.game.tile.TileComponent
 import com.sergeysav.hexasphere.common.game.tile.feature.CityFeatureComponent
 import com.sergeysav.hexasphere.common.game.tile.type.GrasslandTileTypeComponent
@@ -15,6 +18,8 @@ import com.sergeysav.hexasphere.common.icosahedron.Triangle
 import com.sergeysav.hexasphere.common.icosahedron.subdivide
 import com.sergeysav.hexasphere.common.icosahedron.vertices
 import org.joml.Vector3d
+import java.util.Random
+import kotlin.math.PI
 import kotlin.math.atan2
 
 class Hexasphere private constructor(
@@ -36,11 +41,13 @@ class Hexasphere private constructor(
                 }
             }
             var hexagons = 0
-            val tileMap = mutableMapOf<Int, HexasphereTile>()
+            val tileMap = mutableMapOf<Int, Int>()
+            val tileMapInv = mutableMapOf<HexasphereTile, Int>()
             val tiles = mutableListOf<HexasphereTile>()
             val up = Vector3d()
             val right = Vector3d()
             val delta = Vector3d()
+
             for ((vert, faces) in faceMap) {
                 var vertices = faces.map {
                     val center = Vector3d()
@@ -50,11 +57,14 @@ class Hexasphere private constructor(
                     center.normalize()
                 }
                 val center = ico.vertices[vert]
-                center.cross(vertices[0], up).normalize() // up now points up when looking at the tile from outside
-                vertices[0].sub(center, right).normalize() // right now points right when looking at the tile from outside
+                center.cross(vertices[0], up).normalize().mul(-1.0) // up points perpendicular to vertices[0]
+                center.cross(up, right).normalize() // now right points in the same direction as vertices[0]
+
                 vertices = vertices.sortedBy {
+                    // Sort by positive angle around the center using [up] as the y axis and and [right] as the x axis
+                    // sorted this way so that vertices[0] doesnt change (though that probably doesn't matter any more)
                     it.sub(center, delta).normalize()
-                    atan2(up.dot(delta), right.dot(delta))
+                    (atan2(up.dot(delta), right.dot(delta)) + 2 * PI) % (2 * PI)
                 }
                 val tile = if (vertices.size == 5) {
                     HexasphereTile.Pentagon(vertices[0], vertices[1], vertices[2], vertices[3], vertices[4])
@@ -62,15 +72,41 @@ class Hexasphere private constructor(
                     hexagons++
                     HexasphereTile.Hexagon(vertices[0], vertices[1], vertices[2], vertices[3], vertices[4], vertices[5])
                 }
+                tileMap[vert] = tiles.size
                 tiles.add(tile)
-                tileMap[vert] = tile
+                tileMapInv[tile] = vert
             }
-            val adj = MutableList(ico.vertices.size) { IntArray(0) }
-            for ((vert, faces) in faceMap) {
-                adj[vert] = faces.asSequence()
-                        .flatMap { sequenceOf(it.v1, it.v2, it.v3) }
-                        .filter { it != vert }
-                        .distinct().toList().toIntArray()
+
+            val adj = MutableList(tiles.size) { IntArray(0) }
+            for (tile in tiles) {
+                val vert = tileMapInv[tile]!!
+                val faces = faceMap[vert]!!
+
+                val center = ico.vertices[vert]
+                // This MUST be sorted the same way as the tile vertices
+                center.cross(tile.vertices[0], up).normalize().mul(-1.0) // up points perpendicular to vertices[0]
+                center.cross(up, right).normalize() // now right points in the same direction as vertices[0]
+
+                // Compute the adjacent vertices
+                // First take all of the icosahedral faces adjacent to this vertex (in the icosahedron)
+                adj[tileMap[vert]!!] = faces.asSequence()
+                        // Split the list of faces into a list of all of the vertices in all of the faces (with repeats)
+                    .flatMap { sequenceOf(it.v1, it.v2, it.v3) }
+                        // Remove the center (the icosahedral vertex)
+                    .filter { it != vert }
+                        // Remove duplicates
+                    .distinct()
+                        // Sort them the same way that the vertices were sorted
+                    .sortedBy {
+                        // Sort by positive angle around the center using [up] as the y axis and and [right] as the x axis
+                        // sorted this way so that adjacent[i] corresponds to vertex[i]
+                        ico.vertices[it].sub(center, delta).normalize()
+                        (atan2(up.dot(delta), right.dot(delta)) + 2 * PI) % (2 * PI)
+                    }
+                        // Now map the adjacent icosahedral vertices to tiles/faces in the dual (i.e. the hexasphere)
+                    .map { tileMap[it]!! }
+                        // Convert to an array
+                    .toList().toIntArray()
             }
             return Hexasphere(tiles, adj, hexagons)
         }
@@ -99,19 +135,37 @@ fun Hexasphere.addToWorld(world: World, tileEntityMap: Map<HexasphereTile, Int>?
     val tileTypeSystem = world.getSystem(TileTypeSystem::class.java)
     val cityMapper = world.getMapper(CityFeatureComponent::class.java)
 
-    for (i in 0 until 8) {
-        val tile = map.values.random()
-        cityMapper.create(tile)
-    }
+    val player1 = Player(Color.RED)
+    val player2 = Player(Color.BLUE)
+
+    val playerMapper = world.getMapper(PlayerComponent::class.java)
+    val random = Random()
 
     for (tileIdx in tiles.indices) {
-        groupSystem.add(tileIdx, Groups.DIRTY_TILE)
-        tileMapper[map[tiles[tileIdx]] ?: error("This should be impossible")].apply {
-            this.centroid.set(tiles[tileIdx].centroid)
+        val tile = tiles[tileIdx]
+        val tileEntity = map[tile]!!
+        groupSystem.add(tileEntity, Groups.DIRTY_TILE)
+        tileMapper[tileEntity].apply {
+            this.centroid.set(tile.centroid)
             for (adj in adjacencies[tileIdx]) {
-                this.adjacent.add(map[tiles[tileIdx]] ?: error("This should be impossible"))
+                this.adjacent.add(map[tiles[adj]] ?: error("This should be impossible"))
             }
         }
-        tileTypeSystem.setType<GrasslandTileTypeComponent>(tileIdx)
+        tileTypeSystem.setType<GrasslandTileTypeComponent>(tileEntity)
+    }
+
+    for (i in 0 until 32) {
+        val tile = map.values.random()
+        cityMapper.create(tile)
+        val player = if (random.nextBoolean()) player1 else player2
+        playerMapper.create(tile).apply {
+            this.player = player
+        }
+        val adjacent = tileMapper[tile].adjacent
+        for (j in 0 until adjacent.size()) {
+            playerMapper.create(adjacent[j]).apply {
+                this.player = player
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.artemis.WorldConfigurationBuilder
 import com.artemis.managers.GroupManager
 import com.sergeysav.hexasphere.common.ecs.SystemPriority
 import com.sergeysav.hexasphere.common.game.tile.TileCleanerSystem
+import com.sergeysav.hexasphere.common.game.tile.TileOwnerSystem
 import com.sergeysav.hexasphere.common.game.tile.TileSystem
 import com.sergeysav.hexasphere.common.game.tile.feature.TileFeatureSystem
 import com.sergeysav.hexasphere.common.game.tile.type.TileTypeSystem
@@ -18,6 +19,7 @@ object Game {
             .with(SystemPriority.NON_PROCESSING, TileTypeSystem())
             .with(SystemPriority.NON_PROCESSING, TileSystem())
             .with(SystemPriority.NON_PROCESSING, TileFeatureSystem())
+            .with(SystemPriority.NON_PROCESSING, TileOwnerSystem())
             .with(SystemPriority.CLEANUP, TileCleanerSystem())
             .build()
         return World(configuration)
